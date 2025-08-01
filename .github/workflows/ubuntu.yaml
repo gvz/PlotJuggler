@@ -68,3 +68,10 @@ jobs:
         with:
           name: PlotJuggler-x86_64.AppImage
           path: PlotJuggler-x86_64.AppImage
+
+      - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: PlotJuggler-x86_64.AppImage
+          generate_release_notes: true

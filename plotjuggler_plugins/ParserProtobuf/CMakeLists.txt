@@ -9,7 +9,7 @@ endif()
 
 find_package(Protobuf QUIET)
 
-if(Protobuf_FOUND)
+if(PROTOBUF_FOUND)
 
   include_directories(../)
   message(STATUS "[Protobuf] found")

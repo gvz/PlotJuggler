@@ -26,7 +26,7 @@ jobs:
       - name: Cache apt packages
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: software-properties-common qtbase5-dev libqt5svg5-dev libqt5websockets5-dev libqt5opengl5-dev libqt5x11extras5-dev libprotoc-dev libzmq3-dev liblz4-dev libzstd-dev ccache libmosquitto-dev ca-certificates lsb-release wget
+          packages: software-properties-common qtbase5-dev libqt5svg5-dev libqt5websockets5-dev libqt5opengl5-dev libqt5x11extras5-dev libprotoc-dev libzmq3-dev liblz4-dev libzstd-dev ccache libmosquitto-dev ca-certificates lsb-release wget zsync
           version: 1.0
 
       - name: Install Apache Arrow for Parquet support
@@ -64,15 +64,18 @@ jobs:
       - name: Build AppImage
         working-directory: ${{ github.workspace }}
         run: |
-            wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-            wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-            chmod +x linuxdeploy*.AppImage
+            wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+            chmod +x appimagetool-x86_64.AppImage
             mkdir -p AppDir/usr/bin
             cp -v build/bin/* AppDir/usr/bin
-            ./linuxdeploy-x86_64.AppImage --appdir=AppDir \
-              -d ./PlotJuggler.desktop \
-              -i ./plotjuggler.png \
-              --plugin qt --output appimage
+            cp -v ./PlotJuggler.desktop  AppDir/
+            cp -v ./plotjuggler.png  AppDir/
+            ls -l AppDir/usr/bin
+            echo "#!/bin/bash" > AppDir/AppRun
+            echo "APP_DIR=`dirname $0`">> AppDir/AppRun
+            echo "exec $APP_DIR/usr/bin/plotjuggler" >> AppDir/AppRun
+            chmod +x AppDir/AppRun
+            ARCH=x86_64 ./appimagetool-x86_64.AppImage AppDir PlotJuggler-x86_64.AppImage
 
       - name: Upload AppImage
         uses: actions/upload-artifact@v4

@@ -47,13 +47,7 @@
           pname = "plotjuggler";
           version = "3.10.11";
 
-          src = pkgs.fetchFromGitHub {
-            owner = "facontidavide";
-            repo = "PlotJuggler";
-            rev = "3.10.11";
-            fetchSubmodules = true;
-            sha256 = "sha256-BFY4MpJHsGi3IjK9hX23YD45GxTJWcSHm/qXeQBy9u8=";
-          };
+          src = ./.;
 
           postPatch = ''
             substituteInPlace cmake/find_or_download_data_tamer.cmake \
@@ -103,10 +97,6 @@
           cmakeFlags = [
             "-DPLJ_USE_SYSTEM_LUA=ON"
             "-DPLJ_USE_SYSTEM_NLOHMANN_JSON=ON"
-            "-DPLJ_USE_SYSTEM_MOSQUITTO=ON"
-            "-DMOSQUITTO_INCLUDE_DIR=${pkgs.mosquitto}/include"
-            "-DMOSQUITTO_LIBRARIES=${pkgs.mosquitto}/lib/libmosquitto.so"
-            "-DMOSQUITTO_FOUND=TRUE"
           ];
 
           nativeBuildInputs = [
@@ -116,6 +106,9 @@
 
           buildInputs = [
             pkgs.qt5.full
+            pkgs.qt5.qtsvg
+            pkgs.qt5.qtimageformats
+            pkgs.qt5.qtdeclarative
             pkgs.zeromq
             pkgs.sqlite
             pkgs.lua
@@ -126,6 +119,11 @@
             pkgs.zstd
             libmcap-pkg
             pkgs.mosquitto
+            pkgs.protobuf
+            pkgs.xorg.libX11
+            pkgs.xorg.libxcb
+            pkgs.xorg.xcbutil
+            pkgs.xorg.xcbutilkeysyms
           ];
 
           meta = with pkgs.lib; {
@@ -149,10 +147,12 @@
 
         devShells.default = pkgs.mkShell {
           packages = [
-            plotjuggler-pkg
             pkgs.cmake
             pkgs.gcc
             pkgs.qt5.full
+            pkgs.qt5.qtsvg
+            pkgs.qt5.qtimageformats
+            pkgs.qt5.qtdeclarative
             pkgs.zeromq
             pkgs.sqlite
             pkgs.lua
@@ -163,7 +163,12 @@
             pkgs.zstd
             libmcap-pkg
             pkgs.mosquitto
+            pkgs.protobuf
             pkgs.codespell
+            pkgs.xorg.libX11
+            pkgs.xorg.libxcb
+            pkgs.xorg.xcbutil
+            pkgs.xorg.xcbutilkeysyms
           ];
         };
       }

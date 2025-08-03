@@ -56,7 +56,7 @@ bool ProtobufParser::parseMessage(const MessageRef serialized_msg, double& times
       auto field = descriptor->field(index);
 
       std::string key =
-          prefix.empty() ? field->name() : fmt::format("{}/{}", prefix, field->name());
+          prefix.empty() ? std::string(field->name()) : fmt::format("{}/{}", prefix, field->name());
       if (is_map)
       {
         // Map messages only have 2 fields: key and value. The key will be represented in
@@ -156,7 +156,7 @@ bool ProtobufParser::parseMessage(const MessageRef serialized_msg, double& times
                                    reflection->GetRepeatedEnum(msg, field, index);
 
             auto& series = this->getStringSeries(key + suffix);
-            series.pushBack({ timestamp, tmp->name() });
+            series.pushBack({ timestamp, std::string(tmp->name()) });
             is_double = false;
           }
           break;

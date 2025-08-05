@@ -1,6 +1,8 @@
 name: snap_core22
 on:
   push:
+    branches:
+      - main
     tags:
       - '*'
   workflow_dispatch:

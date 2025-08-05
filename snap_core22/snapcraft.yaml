@@ -1,5 +1,5 @@
-name: plotjuggler
-adopt-info: plotjuggler # parse metadata from the plotjuggler part
+name: plotjuggler2
+adopt-info: plotjuggler2 # parse metadata from the plotjuggler part
 summary: The timeseries visualization tool that you deserve
 description: |
   QT5 based application to display time series in plots,
@@ -19,13 +19,13 @@ confinement: strict
 base: core22
 
 apps:
-  plotjuggler:
+  plotjuggler2:
     command: usr/bin/launcher-plotjuggler-ros2
     plugs: [network, network-bind, home, removable-media]
     extensions: [kde-neon, ros2-humble]
 
 parts:
-  plotjuggler:
+  plotjuggler2:
     plugin: cmake
     source: .
     cmake-parameters:

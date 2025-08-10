@@ -110,6 +110,7 @@
             pkgs.xorg.xcbutil
             pkgs.xorg.xcbutilkeysyms
           ];
+          dontWrapQtApps = true;
 
           meta = with pkgs.lib; {
             description = "A tool to plot streaming data, fast and easy";

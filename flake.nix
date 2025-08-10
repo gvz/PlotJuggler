@@ -25,6 +25,7 @@
           version = "3.10.11";
 
           src = ./.;
+          patches = [ ./nix/arrow.patch ];
 
           postPatch = ''
             substituteInPlace cmake/find_or_download_data_tamer.cmake \
@@ -100,6 +101,7 @@
             pkgs.xorg.libxcb
             pkgs.xorg.xcbutil
             pkgs.xorg.xcbutilkeysyms
+            pkgs.arrow-cpp
           ];
           dontWrapQtApps = true;
 
@@ -129,6 +131,7 @@
             pkgs.qt5.qtsvg
             pkgs.qt5.qtimageformats
             pkgs.qt5.qtdeclarative
+            pkgs.arrow-cpp
             pkgs.zeromq
             pkgs.sqlite
             pkgs.lua

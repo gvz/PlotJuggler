@@ -7,6 +7,7 @@ project(
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_COMPILER /nix/store/x8nhgrc0nr5dxl1khxyj25z82pri4bd8-x86_64-unknown-linux-gnu-clang-wrapper-20.1.6/bin/x86_64-unknown-linux-gnu-clang++)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake")
 

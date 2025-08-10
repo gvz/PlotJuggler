@@ -12,8 +12,8 @@ if(MOSQUITTO_FOUND)
   add_library(DataStreamMQTT_Mosquitto SHARED ${SRC} ${UI_SRC})
 
   target_link_libraries(
-    DataStreamMQTT_Mosquitto PRIVATE Qt5::Widgets Qt5::Network Qt5::Svg
-                                     plotjuggler_base)
+    DataStreamMQTT_Mosquitto PRIVATE Qt5::Widgets Qt5::Network Qt5::Core
+                                     Qt5::Svg plotjuggler_base)
 
   target_compile_definitions(DataStreamMQTT_Mosquitto PRIVATE QT_PLUGIN)
 

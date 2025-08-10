@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Idempotent post-install script to make sure everything is correctly installed and configured
+
+ln -s /usr/lib/plotjuggler/plotjuggler /usr/bin/plotjuggler
+echo "plotjuggler: This is a postinst message"

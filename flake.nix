@@ -27,22 +27,6 @@
           sha256 = "sha256-hGfoU6oK7vh39TRCBTYnlqEsvGLWCsLVRBXh3RDrmnY=";
         };
 
-        libmcap-pkg = pkgs.stdenv.mkDerivation rec {
-          pname = "libmcap";
-          version = "1.3.0";
-
-          src = pkgs.fetchgit {
-            url = "https://github.com/foxglove/mcap.git";
-            rev = "releases/cpp/v${version}";
-            sha256 = "sha256-vGMdVNa0wsX9OD0W29Ndk2YmwFphmxPbiovCXtHxF4E=";
-          };
-
-          installPhase = ''
-            mkdir -p $out/include
-            cp -r cpp/mcap/include/mcap $out/include/
-          '';
-        };
-
         plotjuggler-pkg = pkgs.qt5.mkDerivation {
           pname = "plotjuggler";
           version = "3.10.11";
@@ -70,17 +54,18 @@
             cat > plotjuggler_plugins/DataLoadMCAP/CMakeLists.txt << 'EOF'
             cmake_minimum_required(VERSION 3.5)
 
-            set(CMAKE_AUTOUIC ON)
-            set(CMAKE_AUTORCC ON)
-            set(CMAKE_AUTOMOC ON)
+            if(mcap_vendor_FOUND)
+              set(CMAKE_AUTOUIC ON)
+              set(CMAKE_AUTORCC ON)
+              set(CMAKE_AUTOMOC ON)
 
-            project(DataLoadMCAP)
+              project(DataLoadMCAP)
 
-            add_library(mcap INTERFACE)
-            find_package(zstd REQUIRED)
-            find_package(lz4 REQUIRED)
+              add_library(mcap INTERFACE)
+              find_package(zstd REQUIRED)
+              find_package(lz4 REQUIRED)
 
-            add_library(dataload_mcap MODULE dataload_mcap.cpp)
+              add_library(dataload_mcap MODULE dataload_mcap.cpp)
 
             target_link_libraries(
               dataload_mcap PUBLIC Qt5::Widgets Qt5::Xml Qt5::Concurrent plotjuggler_base mcap
@@ -91,6 +76,7 @@
             endif()
 
             install(TARGETS dataload_mcap DESTINATION ''${PJ_PLUGIN_INSTALL_DIRECTORY})
+            endif()
             EOF
           '';
 
@@ -117,7 +103,6 @@
             pkgs.fastcdr
             pkgs.lz4
             pkgs.zstd
-            libmcap-pkg
             pkgs.mosquitto
             pkgs.protobuf
             pkgs.xorg.libX11
@@ -161,7 +146,6 @@
             pkgs.fastcdr
             pkgs.lz4
             pkgs.zstd
-            libmcap-pkg
             pkgs.mosquitto
             pkgs.protobuf
             pkgs.codespell

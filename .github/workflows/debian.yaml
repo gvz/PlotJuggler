@@ -14,17 +14,29 @@ jobs:
   debian-build:
     runs-on: ubuntu-latest
     container:
-      image: debian:${{ matrix.debian-distro }}
+      image: ${{ matrix.debian-distro }}
     strategy:
       fail-fast: false
       matrix:
         debian-distro:
-          - bookworm
-          - trixie
+          - debian:bookworm
+          - debian:trixie
+          - ubuntu:24.04
 
     steps:
       - name: Sync repository
         uses: actions/checkout@v4
+
+      - name: Define short Distribution name
+        id: dist_short
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          SHORT="$(echo '${{ matrix.debian-distro }}' | cut -d':' -f2)"
+          echo "short_name=$SHORT" >> $GITHUB_OUTPUT
+
+          DISTNAME="$(echo '${{ matrix.debian-distro }}' | cut -d':' -f1)"
+          echo "dist_name=$DISTNAME" >> $GITHUB_OUTPUT
 
       - name: install apt packages
         shell: bash
@@ -52,7 +64,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/ccache
-          key: ${{ runner.os }}-${{ matrix.debian-distro }}
+          key: ${{ runner.os }}-${{ steps.dist_short.outputs.short_name }}
 
       - name: Build Plotjuggler
         shell: bash
@@ -75,6 +87,7 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+
       - name: Build debian package
         shell: bash
         working-directory: ${{ github.workspace }}
@@ -85,7 +98,7 @@ jobs:
           cp -rp DEBIAN plotjuggler_'${{ steps.define_version.outputs.version }}'_amd64/
           chmod ogu+x plotjuggler_'${{ steps.define_version.outputs.version }}'_amd64/DEBIAN/postinst
           chmod ogu+x plotjuggler_'${{ steps.define_version.outputs.version }}'_amd64/DEBIAN/preinst
-          mv plotjuggler_'${{ steps.define_version.outputs.version }}'_amd64/DEBIAN/_control.'${{ matrix.debian-distro }}' plotjuggler_'${{ steps.define_version.outputs.version }}'_amd64/DEBIAN/control
+          mv plotjuggler_'${{ steps.define_version.outputs.version }}'_amd64/DEBIAN/_control.'${{ steps.dist_short.outputs.short_name }}' plotjuggler_'${{ steps.define_version.outputs.version }}'_amd64/DEBIAN/control
           rm plotjuggler_'${{ steps.define_version.outputs.version }}'_amd64/DEBIAN/_*
 
           if [ '${{github.ref_type}}' == 'tag' ]; then
@@ -106,5 +119,5 @@ jobs:
       - name: Upload deb
         uses: actions/upload-artifact@v4
         with:
-          name: plotjuggler_${{ steps.define_version.outputs.version }}_amd64_${{ matrix.debian-distro }}.deb
+          name: plotjuggler_${{ steps.define_version.outputs.version }}_amd64_${{ steps.dist_short.outputs.short_name }}.deb
           path: plotjuggler_${{ steps.define_version.outputs.version }}_amd64.deb

@@ -128,8 +128,8 @@ void MQTT_Dialog::saveSettings()
   settings.setValue("MosquittoMQTT::host", ui->lineEditHost->text());
   settings.setValue("MosquittoMQTT::port", ui->lineEditPort->text().toInt());
   settings.setValue("MosquittoMQTT::filter", ui->lineEditTopicFilter->text());
-  settings.setValue("MosquittoMQTT::username", ui->lineEditPassword->text());
-  settings.setValue("MosquittoMQTT::password", ui->lineEditUsername->text());
+  settings.setValue("MosquittoMQTT::password", ui->lineEditPassword->text());
+  settings.setValue("MosquittoMQTT::username", ui->lineEditUsername->text());
   settings.setValue("MosquittoMQTT::protocol_version", ui->comboBoxVersion->currentIndex());
   settings.setValue("MosquittoMQTT::qos", ui->comboBoxQoS->currentIndex());
   settings.setValue("MosquittoMQTT::serialization_protocol", ui->comboBoxProtocol->currentText());

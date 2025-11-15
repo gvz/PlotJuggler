@@ -148,6 +148,7 @@
         <file>resources/svg/play_arrow.svg</file>
         <file>resources/svg/plot_image.svg</file>
         <file>resources/svg/point_chart.svg</file>
+        <file>resources/svg/line_chart.svg</file>
         <file>resources/svg/ratio.svg</file>
         <file>resources/svg/red_circle.svg</file>
         <file>resources/svg/reference_line.svg</file>

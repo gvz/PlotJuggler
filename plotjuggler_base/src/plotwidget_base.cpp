@@ -696,6 +696,16 @@ void PlotWidgetBase::setStyle(QwtPlotCurve* curve, CurveStyle style)
   const auto line_width =
       (style == DOTS) ? dotWidthValue(lineWidth()) : lineWidthValue(lineWidth());
   curve->setPen(curve->pen().color(), line_width);
+  auto pen_color = curve->pen().color();
+  QwtSymbol *symbol = new QwtSymbol(
+          QwtSymbol::Ellipse,
+          QBrush(pen_color),
+          QPen(pen_color),
+          QSize(8, 8)
+          );
+  curve->setSymbol(nullptr);
+
+
 
   switch (style)
   {
@@ -703,6 +713,7 @@ void PlotWidgetBase::setStyle(QwtPlotCurve* curve, CurveStyle style)
       curve->setStyle(QwtPlotCurve::Lines);
       break;
     case LINES_AND_DOTS:
+      curve->setSymbol(symbol);
       curve->setStyle(QwtPlotCurve::LinesAndDots);
       break;
     case DOTS:

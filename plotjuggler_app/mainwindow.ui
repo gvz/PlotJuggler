@@ -1442,9 +1442,6 @@
                    <property name="toolTip">
                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show/Hide the grid&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
                    <property name="text">
                     <string/>
                    </property>
@@ -1653,24 +1650,31 @@
                  </item>
                  <item>
                   <widget class="QPushButton" name="buttonDots">
+                   <property name="minimumSize">
+                    <size>
+                     <width>28</width>
+                     <height>28</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
                      <width>28</width>
                      <height>28</height>
                     </size>
                    </property>
-                   <property name="baseSize">
-                    <size>
-                     <width>28</width>
-                     <height>28</height>
-                    </size>
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Hide/Show dots on lines&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="text">
                     <string/>
                    </property>
                    <property name="icon">
                     <iconset resource="resource.qrc">
-                     <normaloff>:/resources/svg/point_chart.svg</normaloff>:/resources/svg/point_chart.svg</iconset>
+                     <normaloff>:/resources/svg/point_chart.svg</normaloff>
+                     <normalon>:/resources/svg/line_chart.svg</normalon>:/resources/svg/point_chart.svg</iconset>
                    </property>
                    <property name="iconSize">
                     <size>

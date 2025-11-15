@@ -2842,6 +2842,22 @@ void MainWindow::on_buttonUseDateTime_toggled(bool checked)
   updatedDisplayTime();
 }
 
+void MainWindow::on_buttonDots_toggled(bool checked)
+{
+  static bool first = true;
+  if (checked )
+  {
+    forEachWidget([&](PlotWidget* plot) {
+      plot->changeCurvesStyle(PlotWidgetBase::LINES_AND_DOTS);
+      plot->replot();
+    });
+  }else{
+    forEachWidget([&](PlotWidget* plot) {
+      plot->changeCurvesStyle(PlotWidgetBase::LINES);
+    });
+  }
+}
+
 void MainWindow::on_buttonTimeTracker_pressed()
 {
   if (_tracker_param == CurveTracker::LINE_ONLY)
@@ -3747,9 +3763,4 @@ void MainWindow::on_buttonReferencePoint_toggled(bool checked)
 void MainWindow::on_buttonShowpoint_toggled(bool checked)
 {
   this->forEachWidget([checked](PlotWidget* plot) { plot->onShowPlot(checked); });
-}
-
-void MainWindow::on_buttonDots_toggled(bool checked)
-{
-  forEachWidget([&](PlotWidget* plot) { plot->changeDots(checked); });
 }

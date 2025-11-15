@@ -22,28 +22,32 @@
 
         plotjuggler-pkg = pkgs.qt5.mkDerivation {
           pname = "plotjuggler";
-          version = "3.10.11";
+          version = "3.13.2";
 
           src = ./.;
           patches = [ ./nix/arrow.patch ];
 
           postPatch = ''
             substituteInPlace cmake/find_or_download_data_tamer.cmake \
-              --replace "URL" "SOURCE_DIR" \
-              --replace "https://github.com/PickNikRobotics/data_tamer/archive/refs/tags/1.0.3.zip" "${data-tamer-src}"
+              --replace-fail "URL" "SOURCE_DIR" \
+              --replace-fail "https://github.com/PickNikRobotics/data_tamer/archive/refs/tags/1.0.3.zip" "${data-tamer-src}"
 
             rm cmake/find_or_download_fmt.cmake
-            rm cmake/find_or_download_fastcdr.cmake
+            rm cmake/find_or_download_lz4.cmake
             rm cmake/find_or_download_zstd.cmake
+            rm cmake/download_wasmtime.cmake
 
-            substituteInPlace CMakeLists.txt \
-              --replace "include(cmake/find_or_download_fmt.cmake)" "find_package(fmt REQUIRED)" \
-              --replace "find_or_download_fmt()" ""
+            sed -i \
+              -e 's|include(cmake/find_or_download_fmt.cmake)|find_package(fmt REQUIRED)|' \
+              -e 's|include(cmake/download_wasmtime.cmake)|find_package(wasmtime REQUIRED)|' \
+              -e 's|include(''${PROJECT_SOURCE_DIR}/cmake/find_or_download_lz4.cmake)|find_package(lz4 REQUIRED)|' \
+              -e 's|include(''${PROJECT_SOURCE_DIR}/cmake/find_or_download_zstd.cmake)|find_package(zstd REQUIRED)|' \
+              -e 's|find_or_download_fmt()||' \
+              -e 's|find_or_download_lz4()||' \
+              -e 's|find_or_download_zstd()||' \
+              -e 's|download_wasmtime()||' \
+              CMakeLists.txt
 
-            substituteInPlace CMakeLists.txt \
-              --replace "include(cmake/find_or_download_fastcdr.cmake)" "find_package(fastcdr REQUIRED)" \
-              --replace "find_or_download_fastcdr()" ""
-            find . -name "CMakeLists.txt" -exec sed -i 's/fastcdr::fastcdr/fastcdr/g' {} +
 
             cat > plotjuggler_plugins/DataLoadMCAP/CMakeLists.txt << 'EOF'
             cmake_minimum_required(VERSION 3.5)
@@ -82,26 +86,31 @@
 
           nativeBuildInputs = [ pkgs.cmake pkgs.qt5.wrapQtAppsHook ];
 
-          buildInputs = [
-            pkgs.qt5.full
-            pkgs.qt5.qtsvg
-            pkgs.qt5.qtimageformats
-            pkgs.qt5.qtdeclarative
-            pkgs.zeromq
-            pkgs.sqlite
-            pkgs.lua
-            pkgs.nlohmann_json
-            pkgs.fmt
-            pkgs.fastcdr
-            pkgs.lz4
-            pkgs.zstd
-            pkgs.mosquitto
-            pkgs.protobuf
-            pkgs.xorg.libX11
-            pkgs.xorg.libxcb
-            pkgs.xorg.xcbutil
-            pkgs.xorg.xcbutilkeysyms
-            pkgs.arrow-cpp
+          buildInputs = with pkgs; [
+            libsForQt5.qt5.qtwebsockets
+            libsForQt5.qt5.qtx11extras
+            qt5.qtsvg
+            qt5.qtimageformats
+            qt5.qtdeclarative
+            libxcb
+            libxinerama
+            wasmtime
+            wasmtime.dev
+            zeromq
+            sqlite
+            lua
+            nlohmann_json
+            fmt
+            fastcdr
+            lz4
+            zstd
+            mosquitto
+            protobuf
+            xorg.libX11
+            xorg.libxcb
+            xorg.xcbutil
+            xorg.xcbutilkeysyms
+            arrow-cpp
           ];
           dontWrapQtApps = true;
 
@@ -125,28 +134,33 @@
         apps.plotjuggler = self.apps.${system}.default;
 
         devShells.default = pkgs.mkShell {
-          packages = [
-            pkgs.cmake
-            pkgs.qt5.full
-            pkgs.qt5.qtsvg
-            pkgs.qt5.qtimageformats
-            pkgs.qt5.qtdeclarative
-            pkgs.arrow-cpp
-            pkgs.zeromq
-            pkgs.sqlite
-            pkgs.lua
-            pkgs.nlohmann_json
-            pkgs.fmt
-            pkgs.fastcdr
-            pkgs.lz4
-            pkgs.zstd
-            pkgs.mosquitto
-            pkgs.protobuf
-            pkgs.codespell
-            pkgs.xorg.libX11
-            pkgs.xorg.libxcb
-            pkgs.xorg.xcbutil
-            pkgs.xorg.xcbutilkeysyms
+          packages = with pkgs; [
+            cmake
+            libsForQt5.qt5.qtwebsockets
+            libsForQt5.qt5.qtx11extras
+            qt5.qtsvg
+            qt5.qtimageformats
+            qt5.qtdeclarative
+            libxcb
+            libxinerama
+            wasmtime
+            wasmtime.dev
+            arrow-cpp
+            zeromq
+            sqlite
+            lua
+            nlohmann_json
+            fmt
+            fastcdr
+            lz4
+            zstd
+            mosquitto
+            protobuf
+            codespell
+            xorg.libX11
+            xorg.libxcb
+            xorg.xcbutil
+            xorg.xcbutilkeysyms
           ];
         };
       }

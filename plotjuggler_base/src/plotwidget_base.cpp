@@ -686,6 +686,10 @@ std::map<QString, QColor> PlotWidgetBase::getCurveColors() const
 void PlotWidgetBase::setStyle(QwtPlotCurve* curve, CurveStyle style)
 {
   curve->setPen(curve->pen().color(), (style == DOTS) ? 4.0 : 1.3);
+  auto pen_color = curve->pen().color();
+  QwtSymbol* symbol =
+      new QwtSymbol(QwtSymbol::Ellipse, QBrush(pen_color), QPen(pen_color), QSize(8, 8));
+  curve->setSymbol(nullptr);
 
   switch (style)
   {
@@ -693,6 +697,7 @@ void PlotWidgetBase::setStyle(QwtPlotCurve* curve, CurveStyle style)
       curve->setStyle(QwtPlotCurve::Lines);
       break;
     case LINES_AND_DOTS:
+      curve->setSymbol(symbol);
       curve->setStyle(QwtPlotCurve::LinesAndDots);
       break;
     case DOTS:

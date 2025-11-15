@@ -275,6 +275,7 @@ public slots:
   void on_buttonRatio_toggled(bool checked);
   void on_buttonPlay_toggled(bool checked);
   void on_buttonUseDateTime_toggled(bool checked);
+  void on_buttonDots_toggled(bool checked);
   void on_buttonTimeTracker_pressed();
   void on_buttonRemoveTimeOffset_toggled(bool checked);
 

@@ -1431,6 +1431,7 @@ bool MainWindow::loadDataFromFiles(QStringList filenames, bool auto_prefix)
   QStringList loaded_filenames;
   _loaded_datafiles_previous.clear();
 
+
   for (int i = 0; i < filenames.size(); i++)
   {
     FileLoadInfo info;

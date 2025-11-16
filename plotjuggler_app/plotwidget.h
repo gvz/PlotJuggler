@@ -149,6 +149,8 @@ public slots:
 
   void plotOn(const PlotSaveHelper& plot_save_helper, QRect paint_at);
 
+  void on_changeUseUtc(bool use_utc);
+
 private slots:
 
   // void on_changeToBuiltinTransforms(QString new_transform);
@@ -203,6 +205,7 @@ private:
   std::unique_ptr<BackgroundColorItem> _background_item;
 
   bool _use_date_time_scale;
+  bool _use_utc_time;
 
   StatisticsDialog* _statistics_dialog = nullptr;
 

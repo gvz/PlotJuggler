@@ -22,6 +22,7 @@
 #include <QSettings>
 #include <QSvgGenerator>
 #include <QClipboard>
+#include <QTimeZone>
 #include <iostream>
 #include <limits>
 #include <set>
@@ -57,15 +58,28 @@
 
 class TimeScaleDraw : public QwtScaleDraw
 {
+public:
+  TimeScaleDraw(bool use_utc) : _use_utc(use_utc) {}
   virtual QwtText label(double v) const
   {
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch((qint64)(v * 1000));
+    QDateTime dt;
+    if (_use_utc)
+    {
+      dt = QDateTime::fromMSecsSinceEpoch((qint64)(v * 1000), Qt::UTC);
+    }
+    else
+    {
+      dt = QDateTime::fromMSecsSinceEpoch((qint64)(v * 1000));
+    }
+
     if (dt.date().year() == 1970 && dt.date().month() == 1 && dt.date().day() == 1)
     {
       return dt.toString("hh:mm:ss.z");
     }
     return dt.toString("hh:mm:ss.z\nyyyy MMM dd");
   }
+private:
+  bool _use_utc;
 };
 
 const double MAX_DOUBLE = std::numeric_limits<double>::max() / 2;
@@ -1111,6 +1125,16 @@ void PlotWidget::on_changeTimeOffset(double offset)
   updateMaximumZoomArea();
 }
 
+void PlotWidget::on_changeUseUtc(bool use_utc)
+{
+  _use_utc_time = use_utc;
+  if (_use_date_time_scale && !isXYPlot())
+  {
+    qwtPlot()->setAxisScaleDraw(QwtPlot::xBottom, new TimeScaleDraw(_use_utc_time));
+    replot();
+  }
+}
+
 void PlotWidget::on_changeDateTimeScale(bool enable)
 {
   _use_date_time_scale = enable;
@@ -1121,7 +1145,7 @@ void PlotWidget::on_changeDateTimeScale(bool enable)
   {
     if (!is_timescale)
     {
-      qwtPlot()->setAxisScaleDraw(QwtPlot::xBottom, new TimeScaleDraw());
+      qwtPlot()->setAxisScaleDraw(QwtPlot::xBottom, new TimeScaleDraw(_use_utc_time));
     }
   }
   else

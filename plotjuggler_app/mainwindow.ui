@@ -1612,7 +1612,48 @@
                    <property name="icon">
                     <iconset resource="resource.qrc">
                      <normaloff>:/resources/svg/point_chart.svg</normaloff>
-                     <normalon>:/resources/svg/line_chart.svg</normalon>:/resources/svg/point_chart.svg</iconset>
+                     <normalon>:/resources/svg/point_chart.svg</normalon>:/resources/svg/point_chart.svg</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>26</width>
+                     <height>26</height>
+                    </size>
+                   </property>
+                   <property name="checkable">
+                    <bool>true</bool>
+                   </property>
+                   <property name="flat">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="buttonStep">
+                   <property name="minimumSize">
+                    <size>
+                     <width>28</width>
+                     <height>28</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>28</width>
+                     <height>28</height>
+                    </size>
+                   </property>
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display value changes as steps&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resource.qrc">
+                     <normaloff>:/resources/svg/step_chart.svg</normaloff>:/resources/svg/step_chart.svg</iconset>
                    </property>
                    <property name="iconSize">
                     <size>

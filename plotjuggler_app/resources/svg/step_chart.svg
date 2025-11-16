@@ -6,7 +6,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
-   sodipodi:docname="line_chart.svg"
+   sodipodi:docname="step_chart.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -53,7 +53,7 @@
      inkscape:document-units="pt" />
   <path
      style="fill:none;stroke:#000000;stroke-width:35.469;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-     d="M 57.69204,320.75648 192.70247,386.17973 318.84853,259.69808 452.59114,162.68497"
+     d="m 57.69204,386.31995 201.01775,-0.14022 -2.29875,-223.59639 196.1801,0.10163"
      id="path354"
      sodipodi:nodetypes="cccc" />
 </svg>

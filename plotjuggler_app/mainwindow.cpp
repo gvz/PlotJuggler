@@ -411,6 +411,10 @@ MainWindow::MainWindow(const QCommandLineParser& commandline_parser, QWidget* pa
   ui->buttonUseUtc->setChecked(_use_utc_time);
   connect(ui->buttonUseUtc, &QPushButton::toggled, this, &MainWindow::on_buttonUseUtc_toggled);
 
+  _show_time_as_iso = settings.value("MainWindow.showTimeAsISO", false).toBool();
+  ui->buttonShowTimeAsISO->setChecked(_show_time_as_iso);
+  connect(ui->buttonShowTimeAsISO, &QPushButton::toggled, this, &MainWindow::on_buttonShowTimeAsISO_toggled);
+
   if (settings.value("MainWindow.hiddenFileFrame", false).toBool())
   {
     ui->buttonHideFileFrame->setText("+");
@@ -942,6 +946,17 @@ void MainWindow::resizeEvent(QResizeEvent*)
   }
 }
 
+void MainWindow::on_buttonShowTimeAsISO_toggled(bool checked)
+{
+  _show_time_as_iso = checked;
+  QSettings settings;
+  settings.setValue("MainWindow.showTimeAsISO", _show_time_as_iso);
+
+  forEachWidget([this](PlotWidget* plot) {
+    plot->on_changeShowTimeAsISO(_show_time_as_iso);
+  });
+}
+
 void MainWindow::onPlotAdded(PlotWidget* plot)
 {
   connect(plot, &PlotWidget::undoableChange, this, &MainWindow::onUndoableChange);
@@ -977,6 +992,7 @@ void MainWindow::onPlotAdded(PlotWidget* plot)
   plot->on_changeTimeOffset(_time_offset.get());
   plot->on_changeDateTimeScale(ui->buttonUseDateTime->isChecked());
   plot->on_changeUseUtc(_use_utc_time);
+  plot->on_changeShowTimeAsISO(_show_time_as_iso);
   plot->activateGrid(ui->buttonActivateGrid->isChecked());
   plot->enableTracker(!isStreamingActive());
   plot->setKeepRatioXY(ui->buttonRatio->isChecked());

@@ -131,6 +131,7 @@
         <file>resources/svg/copy.svg</file>
         <file>resources/svg/datetime.svg</file>
         <file>resources/svg/utc.svg</file>
+        <file>resources/svg/iso.svg</file>
         <file>resources/svg/expand.svg</file>
         <file>resources/svg/export.svg</file>
         <file>resources/svg/fullscreen.svg</file>

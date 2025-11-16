@@ -1138,6 +1138,11 @@ void PlotWidget::on_changeUseUtc(bool use_utc)
   }
 }
 
+void PlotWidget::on_changeShowTimeAsISO(bool show_iso)
+{
+  _show_time_as_iso = show_iso;
+}
+
 void PlotWidget::on_changeDateTimeScale(bool enable)
 {
   _use_date_time_scale = enable;
@@ -1600,10 +1605,25 @@ void PlotWidget::showPointValues(QPoint point)
         _show_point_marker->setValue(maybe_point.value());
         marker_point = maybe_point.value();
 
+        QString time_string;
+        if (_show_time_as_iso)
+        {
+          QDateTime dt = QDateTime::fromMSecsSinceEpoch((qint64)(maybe_point->x() * 1000));
+          if (_use_utc_time)
+          {
+            dt = dt.toUTC();
+          }
+          time_string = dt.toString(Qt::ISODateWithMs);
+        }
+        else
+        {
+          time_string = QString::number(maybe_point->x(), 'f', prec);
+        }
+
         text = QString("<font color=%1>name: %2<br>time:%3<br>value: %4</font>")
                    .arg(curve->pen().color().name())
                    .arg(curve->title().text())
-                   .arg(QString::number(maybe_point->x(), 'f', prec))
+                   .arg(time_string)
                    .arg(QString::number(maybe_point->y(), 'f', prec));
       }
     }

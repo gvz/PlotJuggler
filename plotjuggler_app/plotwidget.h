@@ -152,6 +152,7 @@ public slots:
   void plotOn(const PlotSaveHelper& plot_save_helper, QRect paint_at);
 
   void on_changeUseUtc(bool use_utc);
+  void on_changeShowTimeAsISO(bool show_iso);
 
 private slots:
 
@@ -208,6 +209,7 @@ private:
 
   bool _use_date_time_scale;
   bool _use_utc_time;
+  bool _show_time_as_iso = false;
 
   StatisticsDialog* _statistics_dialog = nullptr;
 

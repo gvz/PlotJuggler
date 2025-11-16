@@ -732,6 +732,40 @@ void PlotWidgetBase::changeCurvesStyle(CurveStyle style)
   replot();
 }
 
+void PlotWidgetBase::changeDots(bool enabled)
+{
+  for (auto& it : p->curve_list)
+  {
+    if (enabled) {
+      auto pen_color = it.curve->pen().color();
+      QwtSymbol *symbol = new QwtSymbol(
+              QwtSymbol::Ellipse,
+              QBrush(pen_color),
+              QPen(pen_color),
+              QSize(8, 8)
+              );
+      it.curve->setSymbol(symbol);
+    }else{
+      it.curve->setSymbol(nullptr);
+    }
+  }
+  replot();
+}
+
+void PlotWidgetBase::changeStep(bool enabled)
+{
+  for (auto& it : p->curve_list)
+  {
+    if (enabled) {
+      it.curve->setStyle(QwtPlotCurve::Steps);
+      it.curve->setCurveAttribute(QwtPlotCurve::Inverted, false);
+    }else{
+      it.curve->setStyle(QwtPlotCurve::Lines);
+    }
+  }
+  replot();
+}
+
 PlotWidgetBase::CurveInfo* PlotWidgetBase::curveFromTitle(const QString& title)
 {
   for (auto& info : p->curve_list)

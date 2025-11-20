@@ -24,6 +24,7 @@ jobs:
 
       - name: Prepare Homebrew and Install Dependencies
         run: |
+          brew update
           brew cleanup -s
           brew update
           brew install mosquitto zeromq qt@5 protobuf@21

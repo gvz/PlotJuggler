@@ -86,6 +86,27 @@ void StateTimelineWidget::replot()
   update();
 }
 
+void StateTimelineWidget::zoomOut()
+{
+  fitToData();
+  update();
+}
+
+void StateTimelineWidget::setTrackerPosition(double t)
+{
+  _tracker_time = t;
+  update();
+}
+
+void StateTimelineWidget::setXRange(double xmin, double xmax)
+{
+  _suppress_xrange_signal = true;
+  _view_xmin = xmin;
+  _view_xmax = xmax;
+  _suppress_xrange_signal = false;
+  update();
+}
+
 QDomElement StateTimelineWidget::xmlSaveState(QDomDocument& doc) const
 {
   QDomElement elem = doc.createElement("StateTimeline");
@@ -259,6 +280,14 @@ void StateTimelineWidget::paintEvent(QPaintEvent*)
     // Row border
     painter.setPen(QColor(160, 160, 160));
     painter.drawRect(row_rect.adjusted(0, 0, -1, -1));
+  }
+
+  // Tracker vertical line
+  if (!std::isnan(_tracker_time) && _tracker_time >= _view_xmin && _tracker_time <= _view_xmax)
+  {
+    int tx = static_cast<int>(timeToPixel(_tracker_time));
+    painter.setPen(QPen(QColor(255, 100, 0, 200), 1, Qt::DashLine));
+    painter.drawLine(tx, pa.top(), tx, pa.bottom());
   }
 
   drawTimeAxis(painter, pa);
@@ -462,6 +491,7 @@ void StateTimelineWidget::wheelEvent(QWheelEvent* event)
   _view_xmin = center - ratio * range;
   _view_xmax = center + (1.0 - ratio) * range;
   update();
+  emit xRangeChanged(_view_xmin, _view_xmax);
 }
 
 void StateTimelineWidget::mousePressEvent(QMouseEvent* event)
@@ -496,6 +526,7 @@ void StateTimelineWidget::mouseReleaseEvent(QMouseEvent*)
   {
     _panning = false;
     setCursor(Qt::ArrowCursor);
+    emit xRangeChanged(_view_xmin, _view_xmax);
   }
 }
 

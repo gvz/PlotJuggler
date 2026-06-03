@@ -54,6 +54,7 @@ PlotDocker::PlotDocker(QString name, PlotDataMapRef& datamap, QWidget* parent)
       area->setAllowedAreas(ads::OuterDockAreas);
 
       this->plotWidgetAdded(widget->plotWidget());
+      this->stateTimelineAdded(widget->stateTimeline());
 
       connect(widget, &DockWidget::undoableChange, this, &PlotDocker::undoableChange);
     }
@@ -284,7 +285,26 @@ void PlotDocker::zoomOut()
 {
   for (int index = 0; index < plotCount(); index++)
   {
-    plotAt(index)->zoomOut(false);  // TODO is it false?
+    auto* dock = static_cast<DockWidget*>(dockArea(index)->currentDockWidget());
+    if (dock->vizType() == DockWidget::STATE_TIMELINE)
+    {
+      if (dock->stateTimeline())
+        dock->stateTimeline()->zoomOut();
+    }
+    else
+    {
+      plotAt(index)->zoomOut(false);
+    }
+  }
+}
+
+void PlotDocker::forEachStateTimeline(std::function<void(StateTimelineWidget*)> op)
+{
+  for (int index = 0; index < plotCount(); index++)
+  {
+    auto* dock = static_cast<DockWidget*>(dockArea(index)->currentDockWidget());
+    if (dock->stateTimeline())
+      op(dock->stateTimeline());
   }
 }
 
@@ -457,6 +477,7 @@ DockWidget* DockWidget::splitHorizontal()
   area->setAllowedAreas(ads::OuterDockAreas);
 
   parent_docker->plotWidgetAdded(new_widget->plotWidget());
+  parent_docker->stateTimelineAdded(new_widget->stateTimeline());
 
   connect(this, &DockWidget::undoableChange, parent_docker, &PlotDocker::undoableChange);
 
@@ -475,6 +496,7 @@ DockWidget* DockWidget::splitVertical()
 
   area->setAllowedAreas(ads::OuterDockAreas);
   parent_docker->plotWidgetAdded(new_widget->plotWidget());
+  parent_docker->stateTimelineAdded(new_widget->stateTimeline());
 
   connect(this, &DockWidget::undoableChange, parent_docker, &PlotDocker::undoableChange);
 

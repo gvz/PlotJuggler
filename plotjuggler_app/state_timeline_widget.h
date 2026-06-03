@@ -8,6 +8,7 @@
 #define STATE_TIMELINE_WIDGET_H
 
 #include <array>
+#include <limits>
 #include <map>
 #include <string>
 #include <vector>
@@ -28,14 +29,17 @@ public:
   void addSeries(const QString& name);
   void clearSeries();
 
-  // Called by PlotDocker::replot() when data updates
   void replot();
+  void zoomOut();
+  void setTrackerPosition(double t);
+  void setXRange(double xmin, double xmax);
 
   QDomElement xmlSaveState(QDomDocument& doc) const;
   bool xmlLoadState(QDomElement& element);
 
 signals:
   void undoableChange();
+  void xRangeChanged(double xmin, double xmax);
 
 protected:
   void paintEvent(QPaintEvent* event) override;
@@ -67,6 +71,9 @@ private:
   // state value string -> assigned color
   std::map<std::string, QColor> _color_map;
   int _next_color_idx = 0;
+
+  double _tracker_time = std::numeric_limits<double>::quiet_NaN();
+  bool _suppress_xrange_signal = false;
 
   bool _panning = false;
   QPoint _pan_start;

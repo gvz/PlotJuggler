@@ -7,6 +7,7 @@
 #ifndef PLOT_DOCKER_H
 #define PLOT_DOCKER_H
 
+#include <functional>
 #include <QDomElement>
 #include <QStackedWidget>
 #include <QXmlStreamReader>
@@ -93,6 +94,8 @@ public:
 
   void replot();
 
+  void forEachStateTimeline(std::function<void(StateTimelineWidget*)> op);
+
 public slots:
 
   void on_stylesheetChanged(QString theme);
@@ -111,6 +114,8 @@ private:
 signals:
 
   void plotWidgetAdded(PlotWidget*);
+
+  void stateTimelineAdded(StateTimelineWidget*);
 
   void undoableChange();
 };

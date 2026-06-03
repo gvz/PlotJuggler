@@ -69,6 +69,9 @@
             sed -i 's|zstd::libzstd_static|zstd::libzstd_shared|g' \
               plotjuggler_plugins/DataStreamPlotJugglerBridge/CMakeLists.txt
 
+            sed -i 's|zstd::libzstd_static|zstd::libzstd_shared|g' \
+              plotjuggler_plugins/DataLoadMCAP/CMakeLists.txt
+
             rm cmake/find_or_download_fmt.cmake
             rm cmake/find_or_download_lz4.cmake
             rm cmake/find_or_download_zstd.cmake
@@ -86,33 +89,6 @@
               CMakeLists.txt
 
 
-            cat > plotjuggler_plugins/DataLoadMCAP/CMakeLists.txt << 'EOF'
-            cmake_minimum_required(VERSION 3.5)
-
-            if(mcap_vendor_FOUND)
-              set(CMAKE_AUTOUIC ON)
-              set(CMAKE_AUTORCC ON)
-              set(CMAKE_AUTOMOC ON)
-
-              project(DataLoadMCAP)
-
-              add_library(mcap INTERFACE)
-              find_package(zstd REQUIRED)
-              find_package(lz4 REQUIRED)
-
-              add_library(dataload_mcap MODULE dataload_mcap.cpp)
-
-            target_link_libraries(
-              dataload_mcap PUBLIC Qt5::Widgets Qt5::Xml Qt5::Concurrent plotjuggler_base mcap
-                                  zstd lz4)
-
-            if(WIN32 AND MSVC)
-              target_link_options(dataload_mcap PRIVATE /ignore:4217)
-            endif()
-
-            install(TARGETS dataload_mcap DESTINATION ''${PJ_PLUGIN_INSTALL_DIRECTORY})
-            endif()
-            EOF
           '';
 
           cmakeFlags = [

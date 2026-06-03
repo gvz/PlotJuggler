@@ -85,6 +85,8 @@ public:
 
   void changeDots(bool force_dots);
 
+  int canvasLeftOffset() const;
+
 protected:
   PlotDataMapRef& _mapped_data;
 
@@ -104,6 +106,7 @@ signals:
   void curvesDropped();
   void splitHorizontal();
   void splitVertical();
+  void switchToStateTimeline();
 
 public slots:
 
@@ -194,6 +197,8 @@ private:
 
   QAction* _flip_x;
   QAction* _flip_y;
+
+  QAction* _action_switch_to_state_timeline;
 
   CurveTracker* _tracker;
   CurveTracker* _reference_tracker;

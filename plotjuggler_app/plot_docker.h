@@ -7,26 +7,44 @@
 #ifndef PLOT_DOCKER_H
 #define PLOT_DOCKER_H
 
+#include <functional>
 #include <QDomElement>
+#include <QStackedWidget>
 #include <QXmlStreamReader>
 #include "PlotJuggler/plotdata.h"
 #include "plotwidget.h"
 #include "plot_docker_toolbar.h"
+#include "state_timeline_widget.h"
 
 class DockWidget : public ads::CDockWidget
 {
   Q_OBJECT
 
 public:
+  enum VisualizationType
+  {
+    LINE_CHART = 0,
+    STATE_TIMELINE = 1
+  };
+
   DockWidget(PlotDataMapRef& datamap, QWidget* parent = nullptr);
 
   ~DockWidget() override;
 
   PlotWidget* plotWidget();
 
+  StateTimelineWidget* stateTimeline();
+
   DockToolbar* toolBar();
 
   QString name() const;
+
+  VisualizationType vizType() const
+  {
+    return _viz_type;
+  }
+
+  void setVizType(int type);
 
 public slots:
   DockWidget* splitHorizontal();
@@ -34,14 +52,19 @@ public slots:
   DockWidget* splitVertical();
 
 private:
+  QStackedWidget* _stacked_widget = nullptr;
   PlotWidget* _plot_widget = nullptr;
+  StateTimelineWidget* _state_timeline = nullptr;
 
   DockToolbar* _toolbar;
 
   PlotDataMapRef& _datamap;
 
+  VisualizationType _viz_type = LINE_CHART;
+
 signals:
   void undoableChange();
+  void vizTypeChanged(VisualizationType type);
 };
 
 class PlotDocker : public ads::CDockManager
@@ -71,6 +94,8 @@ public:
 
   void replot();
 
+  void forEachStateTimeline(std::function<void(StateTimelineWidget*)> op);
+
 public slots:
 
   void on_stylesheetChanged(QString theme);
@@ -89,6 +114,8 @@ private:
 signals:
 
   void plotWidgetAdded(PlotWidget*);
+
+  void stateTimelineAdded(StateTimelineWidget*);
 
   void undoableChange();
 };

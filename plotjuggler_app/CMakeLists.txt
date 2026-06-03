@@ -60,6 +60,7 @@ set(PLOTJUGGLER_SRC
     plotwidget_transforms.cpp
     plot_docker.cpp
     plot_docker_toolbar.cpp
+    state_timeline_widget.cpp
     preferences_dialog.cpp
     point_series_xy.cpp
     # plotzoomer.cpp

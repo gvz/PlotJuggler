@@ -697,15 +697,9 @@ void PlotWidgetBase::setStyle(QwtPlotCurve* curve, CurveStyle style)
       (style == DOTS) ? dotWidthValue(lineWidth()) : lineWidthValue(lineWidth());
   curve->setPen(curve->pen().color(), line_width);
   auto pen_color = curve->pen().color();
-  QwtSymbol *symbol = new QwtSymbol(
-          QwtSymbol::Ellipse,
-          QBrush(pen_color),
-          QPen(pen_color),
-          QSize(8, 8)
-          );
+  QwtSymbol* symbol =
+      new QwtSymbol(QwtSymbol::Ellipse, QBrush(pen_color), QPen(pen_color), QSize(8, 8));
   curve->setSymbol(nullptr);
-
-
 
   switch (style)
   {
@@ -747,16 +741,15 @@ void PlotWidgetBase::changeDots(bool enabled)
 {
   for (auto& it : p->curve_list)
   {
-    if (enabled) {
+    if (enabled)
+    {
       auto pen_color = it.curve->pen().color();
-      QwtSymbol *symbol = new QwtSymbol(
-              QwtSymbol::Ellipse,
-              QBrush(pen_color),
-              QPen(pen_color),
-              QSize(8, 8)
-              );
+      QwtSymbol* symbol =
+          new QwtSymbol(QwtSymbol::Ellipse, QBrush(pen_color), QPen(pen_color), QSize(8, 8));
       it.curve->setSymbol(symbol);
-    }else{
+    }
+    else
+    {
       it.curve->setSymbol(nullptr);
     }
   }
@@ -767,10 +760,13 @@ void PlotWidgetBase::changeStep(bool enabled)
 {
   for (auto& it : p->curve_list)
   {
-    if (enabled) {
+    if (enabled)
+    {
       it.curve->setStyle(QwtPlotCurve::Steps);
       it.curve->setCurveAttribute(QwtPlotCurve::Inverted, false);
-    }else{
+    }
+    else
+    {
       it.curve->setStyle(QwtPlotCurve::Lines);
     }
   }

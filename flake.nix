@@ -69,7 +69,9 @@
             sed -i 's|zstd::libzstd_static|zstd::libzstd_shared|g' \
               plotjuggler_plugins/DataStreamPlotJugglerBridge/CMakeLists.txt
 
-            sed -i 's|zstd::libzstd_static|zstd::libzstd_shared|g' \
+            sed -i \
+              -e 's|zstd::libzstd_static|zstd::libzstd_shared|g' \
+              -e 's|LZ4::lz4_static|LZ4::lz4_shared|g' \
               plotjuggler_plugins/DataLoadMCAP/CMakeLists.txt
 
             rm cmake/find_or_download_fmt.cmake

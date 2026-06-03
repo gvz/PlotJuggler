@@ -66,6 +66,9 @@
               -e '/URL_HASH SHA256=/d' \
               cmake/download_wasmer.cmake
 
+            sed -i 's|zstd::libzstd_static|zstd::libzstd_shared|g' \
+              plotjuggler_plugins/DataStreamPlotJugglerBridge/CMakeLists.txt
+
             rm cmake/find_or_download_fmt.cmake
             rm cmake/find_or_download_lz4.cmake
             rm cmake/find_or_download_zstd.cmake
@@ -118,7 +121,7 @@
           ];
 
 
-          nativeBuildInputs = [ pkgs.cmake pkgs.qt5.wrapQtAppsHook ];
+          nativeBuildInputs = [ pkgs.cmake pkgs.qt5.wrapQtAppsHook pkgs.makeWrapper ];
 
           buildInputs = with pkgs; [
             libsForQt5.qt5.qtwebsockets
@@ -126,6 +129,7 @@
             qt5.qtsvg
             qt5.qtimageformats
             qt5.qtdeclarative
+            libsForQt5.qt5.qtwayland
             libxcb
             libxinerama
             wasmtime
@@ -147,6 +151,13 @@
             arrow-cpp
           ];
           dontWrapQtApps = true;
+
+          postInstall = ''
+            wrapProgram $out/bin/plotjuggler \
+              --prefix QT_PLUGIN_PATH : "${pkgs.qt5.qtbase}/${pkgs.qt5.qtbase.qtPluginPrefix}" \
+              --prefix QT_PLUGIN_PATH : "${pkgs.libsForQt5.qt5.qtwayland.bin}/${pkgs.qt5.qtbase.qtPluginPrefix}" \
+              --set-default QT_QPA_PLATFORM xcb
+          '';
 
           meta = with pkgs.lib; {
             description = "A tool to plot streaming data, fast and easy";

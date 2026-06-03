@@ -125,6 +125,12 @@ QDomElement saveChildNodesState(QDomDocument& doc, QWidget* widget)
           auto plotwidget_elem = dock_widget->plotWidget()->xmlSaveState(doc);
           area_elem.appendChild(plotwidget_elem);
           area_elem.setAttribute("name", dock_widget->toolBar()->label()->text());
+          area_elem.setAttribute("viz_type", static_cast<int>(dock_widget->vizType()));
+          if (dock_widget->vizType() == DockWidget::STATE_TIMELINE &&
+              dock_widget->stateTimeline())
+          {
+            area_elem.appendChild(dock_widget->stateTimeline()->xmlSaveState(doc));
+          }
         }
       }
       return area_elem;
@@ -204,6 +210,18 @@ void PlotDocker::restoreSplitter(QDomElement elem, DockWidget* widget)
         QString area_name = child_elem.attribute("name");
         widgets[index]->toolBar()->label()->setText(area_name);
       }
+      if (child_elem.hasAttribute("viz_type"))
+      {
+        int vtype = child_elem.attribute("viz_type").toInt();
+        widgets[index]->setVizType(vtype);
+        if (vtype == static_cast<int>(DockWidget::STATE_TIMELINE) &&
+            widgets[index]->stateTimeline())
+        {
+          auto stelem = child_elem.firstChildElement("StateTimeline");
+          if (!stelem.isNull())
+            widgets[index]->stateTimeline()->xmlLoadState(stelem);
+        }
+      }
       index++;
     }
     else if (child_elem.tagName() == "DockSplitter")
@@ -274,7 +292,16 @@ void PlotDocker::replot()
 {
   for (int index = 0; index < plotCount(); index++)
   {
-    plotAt(index)->replot();
+    auto* dock = static_cast<DockWidget*>(dockArea(index)->currentDockWidget());
+    if (dock->vizType() == DockWidget::STATE_TIMELINE)
+    {
+      if (dock->stateTimeline())
+        dock->stateTimeline()->replot();
+    }
+    else
+    {
+      plotAt(index)->replot();
+    }
   }
 }
 
@@ -339,8 +366,14 @@ DockWidget::DockWidget(PlotDataMapRef& datamap, QWidget* parent)
 
   static int plot_count = 0;
   QString plot_name = QString("_plot_%1_").arg(plot_count++);
-  _plot_widget = new PlotWidget(datamap, this);
-  setWidget(_plot_widget);
+
+  _stacked_widget = new QStackedWidget(this);
+  _plot_widget = new PlotWidget(datamap, _stacked_widget);
+  _state_timeline = new StateTimelineWidget(datamap, _stacked_widget);
+  _stacked_widget->addWidget(_plot_widget);      // index 0 = LINE_CHART
+  _stacked_widget->addWidget(_state_timeline);   // index 1 = STATE_TIMELINE
+
+  setWidget(_stacked_widget);
   setFeature(ads::CDockWidget::DockWidgetFloatable, false);
   setFeature(ads::CDockWidget::DockWidgetDeleteOnClose, true);
 
@@ -385,16 +418,32 @@ DockWidget::DockWidget(PlotDataMapRef& datamap, QWidget* parent)
   QObject::connect(_toolbar->buttonClose(), &QPushButton::pressed, [this]() {
     dockAreaWidget()->closeArea();
     takeWidget();
-    _plot_widget->deleteLater();
+    _stacked_widget->deleteLater();
+    _stacked_widget = nullptr;
     _plot_widget = nullptr;
+    _state_timeline = nullptr;
     this->undoableChange();
   });
+
+  connect(_toolbar, &DockToolbar::vizTypeChanged, this, &DockWidget::setVizType);
+
+  connect(_state_timeline, &StateTimelineWidget::undoableChange, this,
+          &DockWidget::undoableChange);
 
   this->layout()->setMargin(10);
 }
 
 DockWidget::~DockWidget()
 {
+}
+
+void DockWidget::setVizType(int type)
+{
+  _viz_type = static_cast<VisualizationType>(type);
+  _toolbar->vizTypeCombo()->setCurrentIndex(type);
+  _stacked_widget->setCurrentIndex(type);
+  emit vizTypeChanged(_viz_type);
+  emit undoableChange();
 }
 
 DockWidget* DockWidget::splitHorizontal()
@@ -437,6 +486,11 @@ DockWidget* DockWidget::splitVertical()
 PlotWidget* DockWidget::plotWidget()
 {
   return _plot_widget;
+}
+
+StateTimelineWidget* DockWidget::stateTimeline()
+{
+  return _state_timeline;
 }
 
 DockToolbar* DockWidget::toolBar()

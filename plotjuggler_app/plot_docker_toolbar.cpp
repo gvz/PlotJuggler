@@ -27,6 +27,9 @@ DockToolbar::DockToolbar(ads::CDockWidget* parent)
 
   ui->label->installEventFilter(this);
 
+  connect(ui->comboVizType, qOverload<int>(&QComboBox::currentIndexChanged), this,
+          &DockToolbar::vizTypeChanged);
+
   setAcceptDrops(true);
 }
 

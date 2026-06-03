@@ -326,8 +326,6 @@ private slots:
   void on_buttonUseUtc_toggled(bool checked);
   void on_buttonShowTimeAsISO_toggled(bool checked);
 
-  void on_buttonDots_toggled(bool checked);
-
 private:
   bool _use_utc_time;
   bool _show_time_as_iso;

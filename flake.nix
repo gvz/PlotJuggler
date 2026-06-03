@@ -143,7 +143,6 @@
             lz4
             zstd
             mosquitto
-            protobuf
             xorg.libX11
             xorg.libxcb
             xorg.xcbutil

@@ -313,15 +313,22 @@ void StateTimelineWidget::drawStringSeries(QPainter& painter, const StringSeries
   f.setPointSizeF(std::max(7.0, f.pointSizeF() - 1));
   painter.setFont(f);
 
-  for (size_t i = 0; i < n; i++)
+  size_t i = 0;
+  while (i < n)
   {
+    std::string state_val = std::string(series.getString(series.at(i).y));
     double t_start = series.at(i).x;
-    double t_end = (i + 1 < n) ? series.at(i + 1).x : _view_xmax;
+
+    // Advance while the state stays the same — merge consecutive equal segments
+    size_t j = i + 1;
+    while (j < n && std::string(series.getString(series.at(j).y)) == state_val)
+      ++j;
+
+    double t_end = (j < n) ? series.at(j).x : _view_xmax;
+    i = j;
 
     if (t_end < _view_xmin || t_start > _view_xmax)
       continue;
-
-    std::string state_val = std::string(series.getString(series.at(i).y));
 
     int x0 = static_cast<int>(timeToPixel(t_start));
     int x1 = static_cast<int>(timeToPixel(t_end));
@@ -344,6 +351,16 @@ void StateTimelineWidget::drawStringSeries(QPainter& painter, const StringSeries
   }
 }
 
+static std::string numericStateLabel(double val)
+{
+  char buf[32];
+  if (std::fabs(val - std::round(val)) < 1e-9)
+    std::snprintf(buf, sizeof(buf), "%d", static_cast<int>(std::round(val)));
+  else
+    std::snprintf(buf, sizeof(buf), "%.4g", val);
+  return buf;
+}
+
 void StateTimelineWidget::drawNumericSeries(QPainter& painter, const PlotData& series,
                                              const QRect& row_rect)
 {
@@ -355,21 +372,22 @@ void StateTimelineWidget::drawNumericSeries(QPainter& painter, const PlotData& s
   f.setPointSizeF(std::max(7.0, f.pointSizeF() - 1));
   painter.setFont(f);
 
-  for (size_t i = 0; i < n; i++)
+  size_t i = 0;
+  while (i < n)
   {
+    std::string state_val = numericStateLabel(series.at(i).y);
     double t_start = series.at(i).x;
-    double t_end = (i + 1 < n) ? series.at(i + 1).x : _view_xmax;
+
+    // Advance while the value stays the same — merge consecutive equal segments
+    size_t j = i + 1;
+    while (j < n && numericStateLabel(series.at(j).y) == state_val)
+      ++j;
+
+    double t_end = (j < n) ? series.at(j).x : _view_xmax;
+    i = j;
 
     if (t_end < _view_xmin || t_start > _view_xmax)
       continue;
-
-    double val = series.at(i).y;
-    char buf[32];
-    if (std::fabs(val - std::round(val)) < 1e-9)
-      std::snprintf(buf, sizeof(buf), "%d", static_cast<int>(std::round(val)));
-    else
-      std::snprintf(buf, sizeof(buf), "%.4g", val);
-    std::string state_val(buf);
 
     int x0 = static_cast<int>(timeToPixel(t_start));
     int x1 = static_cast<int>(timeToPixel(t_end));

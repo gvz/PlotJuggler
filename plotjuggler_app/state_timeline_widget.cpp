@@ -116,6 +116,15 @@ void StateTimelineWidget::setUseDateTimeScale(bool enable, bool use_utc)
   update();
 }
 
+void StateTimelineWidget::setLeftMargin(int px)
+{
+  if (_left_margin != px)
+  {
+    _left_margin = px;
+    update();
+  }
+}
+
 QDomElement StateTimelineWidget::xmlSaveState(QDomDocument& doc) const
 {
   QDomElement elem = doc.createElement("StateTimeline");
@@ -146,7 +155,7 @@ bool StateTimelineWidget::xmlLoadState(QDomElement& element)
 
 QRect StateTimelineWidget::plotArea() const
 {
-  return QRect(LEFT_MARGIN, TOP_MARGIN, width() - LEFT_MARGIN - 4,
+  return QRect(_left_margin, TOP_MARGIN, width() - _left_margin - 4,
                height() - TOP_MARGIN - BOTTOM_MARGIN);
 }
 
@@ -255,7 +264,7 @@ void StateTimelineWidget::paintEvent(QPaintEvent*)
     QRect row_rect(pa.left(), y_top, pa.width(), row_h);
 
     // Label on the left
-    QRect label_rect(0, y_top, LEFT_MARGIN - 6, row_h);
+    QRect label_rect(0, y_top, _left_margin - 6, row_h);
     painter.setPen(fg);
     QFont f = painter.font();
     f.setPointSizeF(std::max(7.0, f.pointSizeF() - 1));

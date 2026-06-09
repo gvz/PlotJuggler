@@ -85,6 +85,8 @@ public:
 
   void changeDots(bool force_dots);
 
+  int canvasLeftOffset() const;
+
 protected:
   PlotDataMapRef& _mapped_data;
 

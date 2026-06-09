@@ -1911,3 +1911,8 @@ QwtSeriesWrapper* PlotWidget::createTimeSeries(const PlotData* data, const QStri
   output->updateCache(true);
   return output;
 }
+
+int PlotWidget::canvasLeftOffset() const
+{
+  return qwtPlot()->canvas()->x();
+}

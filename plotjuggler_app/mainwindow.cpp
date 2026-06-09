@@ -992,6 +992,9 @@ void MainWindow::onPlotAdded(PlotWidget* plot)
 
   connect(plot, &PlotWidget::rectChanged, this, &MainWindow::onPlotZoomChanged);
 
+  connect(plot, &PlotWidgetBase::widgetResized, this, &MainWindow::syncXAxisAlignment);
+  connect(plot, &PlotWidget::curveListChanged, this, &MainWindow::syncXAxisAlignment);
+
   plot->setTrackerPosition(_tracker_time);
   plot->on_changeTimeOffset(_time_offset.get());
   plot->on_changeDateTimeScale(ui->buttonUseDateTime->isChecked());
@@ -1078,6 +1081,9 @@ void MainWindow::onStateTimelineAdded(StateTimelineWidget* st)
           [this, st](double xmin, double xmax) {
             onStateTimelineXRangeChanged(st, xmin, xmax);
           });
+
+  // Align x-axis start with adjacent PlotWidgets
+  syncXAxisAlignment();
 }
 
 void MainWindow::onStateTimelineXRangeChanged(StateTimelineWidget* source, double xmin,
@@ -1119,6 +1125,22 @@ void MainWindow::forEachStateTimeline(std::function<void(StateTimelineWidget*)> 
   for (const auto& it : TabbedPlotWidget::instances())
   {
     func(it.second->tabWidget());
+  }
+}
+
+void MainWindow::syncXAxisAlignment()
+{
+  // Use the canvas left offset from any available PlotWidget as the reference
+  int left_offset = -1;
+  forEachWidget([&](PlotWidget* plot) {
+    if (left_offset < 0)
+      left_offset = plot->canvasLeftOffset();
+  });
+  if (left_offset > 0)
+  {
+    forEachStateTimeline([left_offset](StateTimelineWidget* st) {
+      st->setLeftMargin(left_offset);
+    });
   }
 }
 

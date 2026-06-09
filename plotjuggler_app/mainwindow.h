@@ -219,6 +219,7 @@ private:
   void forEachWidget(std::function<void(PlotWidget*, PlotDocker*, int)> op);
   void forEachWidget(std::function<void(PlotWidget*)> op);
   void forEachStateTimeline(std::function<void(StateTimelineWidget*)> op);
+  void syncXAxisAlignment();
 
   void rearrangeGridLayout();
 

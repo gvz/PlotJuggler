@@ -34,6 +34,7 @@ public:
   void setTrackerPosition(double t);
   void setXRange(double xmin, double xmax);
   void setUseDateTimeScale(bool enable, bool use_utc);
+  void setLeftMargin(int px);
 
   QDomElement xmlSaveState(QDomDocument& doc) const;
   bool xmlLoadState(QDomElement& element);
@@ -85,7 +86,7 @@ private:
   double _pan_xmin_start = 0.0;
   double _pan_xmax_start = 0.0;
 
-  static constexpr int LEFT_MARGIN = 160;
+  int _left_margin = 160;
   static constexpr int BOTTOM_MARGIN = 28;
   static constexpr int TOP_MARGIN = 6;
   static constexpr int ROW_GAP = 3;

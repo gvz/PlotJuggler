@@ -1068,6 +1068,11 @@ void MainWindow::onStateTimelineAdded(StateTimelineWidget* st)
   // Keep tracker in sync
   st->setTrackerPosition(_tracker_time);
 
+  // Match datetime/UTC scale from the main toolbar
+  st->setUseDateTimeScale(ui->buttonUseDateTime->isChecked(), _use_utc_time);
+  connect(ui->buttonUseDateTime, &QPushButton::toggled, st,
+          [this, st](bool checked) { st->setUseDateTimeScale(checked, _use_utc_time); });
+
   // Propagate this widget's pan/zoom to all line-chart panels (and other state timelines)
   connect(st, &StateTimelineWidget::xRangeChanged, this,
           [this, st](double xmin, double xmax) {
@@ -2944,6 +2949,9 @@ void MainWindow::on_buttonUseUtc_toggled(bool checked)
   updatedDisplayTime();
   forEachWidget([this](PlotWidget* plot) {
     plot->on_changeUseUtc(_use_utc_time);
+  });
+  forEachStateTimeline([this](StateTimelineWidget* st) {
+    st->setUseDateTimeScale(true, _use_utc_time);
   });
   if (first)
   {

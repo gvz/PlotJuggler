@@ -16,6 +16,7 @@
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
 #include <QDropEvent>
+#include <QDateTime>
 #include <QFontMetrics>
 #include <QLocale>
 #include <QMenu>
@@ -105,6 +106,13 @@ void StateTimelineWidget::setXRange(double xmin, double xmax)
   _view_xmin = xmin;
   _view_xmax = xmax;
   _suppress_xrange_signal = false;
+  update();
+}
+
+void StateTimelineWidget::setUseDateTimeScale(bool enable, bool use_utc)
+{
+  _use_date_time_scale = enable;
+  _use_utc_time = use_utc;
   update();
 }
 
@@ -424,8 +432,22 @@ void StateTimelineWidget::drawTimeAxis(QPainter& painter, const QRect& pa)
     if (x < pa.left() || x > pa.right())
       continue;
     painter.drawLine(x, axis_y, x, axis_y + 4);
-    // Match Qwt's QwtScaleDraw::label() which uses QLocale().toString(v)
-    QString label = QLocale().toString(t, 'g', 6);
+    QString label;
+    if (_use_date_time_scale)
+    {
+      QDateTime dt = _use_utc_time
+                         ? QDateTime::fromMSecsSinceEpoch((qint64)(t * 1000), Qt::UTC)
+                         : QDateTime::fromMSecsSinceEpoch((qint64)(t * 1000));
+      if (dt.date().year() == 1970 && dt.date().month() == 1 && dt.date().day() == 1)
+        label = dt.toString("hh:mm:ss.z");
+      else
+        label = dt.toString("hh:mm:ss.z\nyyyy MMM dd");
+    }
+    else
+    {
+      // Match Qwt's QwtScaleDraw::label() which uses QLocale().toString(v)
+      label = QLocale().toString(t, 'g', 6);
+    }
     painter.drawText(x - 40, axis_y + 5, 80, BOTTOM_MARGIN - 5, Qt::AlignHCenter | Qt::AlignTop,
                      label);
   }

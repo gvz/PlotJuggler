@@ -33,6 +33,7 @@ public:
   void zoomOut();
   void setTrackerPosition(double t);
   void setXRange(double xmin, double xmax);
+  void setUseDateTimeScale(bool enable, bool use_utc);
 
   QDomElement xmlSaveState(QDomDocument& doc) const;
   bool xmlLoadState(QDomElement& element);
@@ -75,6 +76,9 @@ private:
 
   double _tracker_time = std::numeric_limits<double>::quiet_NaN();
   bool _suppress_xrange_signal = false;
+
+  bool _use_date_time_scale = false;
+  bool _use_utc_time = false;
 
   bool _panning = false;
   QPoint _pan_start;

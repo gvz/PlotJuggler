@@ -40,6 +40,7 @@ public:
 signals:
   void undoableChange();
   void xRangeChanged(double xmin, double xmax);
+  void switchToLineChart();
 
 protected:
   void paintEvent(QPaintEvent* event) override;

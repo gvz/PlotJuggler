@@ -15,7 +15,6 @@
 #include "Qads/FloatingDockContainer.h"
 #include "Qads/DockComponentsFactory.h"
 #include "ui_plot_docker_toolbar.h"
-#include <QComboBox>
 
 class DockToolbar : public QWidget
 {
@@ -44,11 +43,6 @@ public:
   QPushButton* buttonSplitVertical()
   {
     return ui->buttonSplitVertical;
-  }
-
-  QComboBox* vizTypeCombo()
-  {
-    return ui->comboVizType;
   }
 
   void toggleFullscreen();
@@ -85,7 +79,6 @@ private:
 signals:
   void backgroundColorRequest(QString name);
   void titleChanged(QString title);
-  void vizTypeChanged(int type);
 
 private slots:
   void on_buttonBackground_clicked();

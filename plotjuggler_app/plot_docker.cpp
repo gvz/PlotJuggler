@@ -445,7 +445,11 @@ DockWidget::DockWidget(PlotDataMapRef& datamap, QWidget* parent)
     this->undoableChange();
   });
 
-  connect(_toolbar, &DockToolbar::vizTypeChanged, this, &DockWidget::setVizType);
+  connect(_plot_widget, &PlotWidget::switchToStateTimeline, this,
+          [this]() { setVizType(STATE_TIMELINE); });
+
+  connect(_state_timeline, &StateTimelineWidget::switchToLineChart, this,
+          [this]() { setVizType(LINE_CHART); });
 
   connect(_state_timeline, &StateTimelineWidget::undoableChange, this,
           &DockWidget::undoableChange);
@@ -460,7 +464,6 @@ DockWidget::~DockWidget()
 void DockWidget::setVizType(int type)
 {
   _viz_type = static_cast<VisualizationType>(type);
-  _toolbar->vizTypeCombo()->setCurrentIndex(type);
   _stacked_widget->setCurrentIndex(type);
   emit vizTypeChanged(_viz_type);
   emit undoableChange();

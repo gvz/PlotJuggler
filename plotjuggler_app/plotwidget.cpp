@@ -153,6 +153,7 @@ PlotWidget::~PlotWidget()
   delete _action_paste;
   delete _action_image_to_clipboard;
   delete _action_data_statistics;
+  delete _action_switch_to_state_timeline;
 }
 
 void PlotWidget::setContextMenuEnabled(bool enabled)
@@ -238,6 +239,10 @@ void PlotWidget::buildActions()
 
   _action_data_statistics = new QAction("&Show data statistics", this);
   connect(_action_data_statistics, &QAction::triggered, this, &PlotWidget::onShowDataStatistics);
+
+  _action_switch_to_state_timeline = new QAction("&Switch to State Timeline", this);
+  connect(_action_switch_to_state_timeline, &QAction::triggered, this,
+          &PlotWidget::switchToStateTimeline);
 }
 
 void PlotWidget::canvasContextMenuTriggered(const QPoint& pos)
@@ -267,6 +272,7 @@ void PlotWidget::canvasContextMenuTriggered(const QPoint& pos)
 
   menu.addAction(_action_edit);
   menu.addAction(_action_formula);
+  menu.addAction(_action_switch_to_state_timeline);
   menu.addSeparator();
   menu.addAction(_action_split_horizontal);
   menu.addAction(_action_split_vertical);

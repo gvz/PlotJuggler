@@ -544,6 +544,8 @@ void StateTimelineWidget::resizeEvent(QResizeEvent*)
 void StateTimelineWidget::contextMenuEvent(QContextMenuEvent* event)
 {
   QMenu menu;
+  QAction* switch_action = menu.addAction("Switch to Line Chart");
+  menu.addSeparator();
   QAction* fit_action = menu.addAction("Zoom to fit");
   menu.addSeparator();
 
@@ -561,7 +563,11 @@ void StateTimelineWidget::contextMenuEvent(QContextMenuEvent* event)
   if (!selected)
     return;
 
-  if (selected == fit_action)
+  if (selected == switch_action)
+  {
+    emit switchToLineChart();
+  }
+  else if (selected == fit_action)
   {
     fitToData();
     update();

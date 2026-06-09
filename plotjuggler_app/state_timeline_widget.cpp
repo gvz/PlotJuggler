@@ -17,6 +17,7 @@
 #include <QDragLeaveEvent>
 #include <QDropEvent>
 #include <QFontMetrics>
+#include <QLocale>
 #include <QMenu>
 #include <QMimeData>
 #include <QMouseEvent>
@@ -412,14 +413,19 @@ void StateTimelineWidget::drawTimeAxis(QPainter& painter, const QRect& pa)
   f.setPointSizeF(std::max(7.0, f.pointSizeF() - 1));
   painter.setFont(f);
 
-  double first = std::ceil(_view_xmin / interval) * interval;
-  for (double t = first; t <= _view_xmax + 1e-9 * interval; t += interval)
+  // Index-based iteration avoids floating-point accumulation from repeated +=
+  long long first_idx = static_cast<long long>(std::ceil(_view_xmin / interval));
+  for (long long idx = first_idx; ; ++idx)
   {
+    double t = idx * interval;  // no cumulative error
+    if (t > _view_xmax + 1e-9 * interval)
+      break;
     int x = static_cast<int>(timeToPixel(t));
     if (x < pa.left() || x > pa.right())
       continue;
     painter.drawLine(x, axis_y, x, axis_y + 4);
-    QString label = QString::number(t, 'g', 5);
+    // Match Qwt's QwtScaleDraw::label() which uses QLocale().toString(v)
+    QString label = QLocale().toString(t, 'g', 6);
     painter.drawText(x - 40, axis_y + 5, 80, BOTTOM_MARGIN - 5, Qt::AlignHCenter | Qt::AlignTop,
                      label);
   }

@@ -106,6 +106,10 @@ public:
 
   void setSwapZoomPan(bool swapped);
 
+  void changeDots(bool enabled);
+
+  void changeStep(bool enabled);
+
   bool isXYPlot() const;
 
   QRectF currentBoundingRect() const;

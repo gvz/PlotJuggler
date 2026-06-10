@@ -407,6 +407,14 @@ MainWindow::MainWindow(const QCommandLineParser& commandline_parser, QWidget* pa
   bool remove_time_offset = settings.value("MainWindow.removeTimeOffset", true).toBool();
   ui->buttonRemoveTimeOffset->setChecked(remove_time_offset);
 
+  _use_utc_time = settings.value("MainWindow.useUtcTime", true).toBool();
+  ui->buttonUseUtc->setChecked(_use_utc_time);
+  connect(ui->buttonUseUtc, &QPushButton::toggled, this, &MainWindow::on_buttonUseUtc_toggled);
+
+  _show_time_as_iso = settings.value("MainWindow.showTimeAsISO", false).toBool();
+  ui->buttonShowTimeAsISO->setChecked(_show_time_as_iso);
+  connect(ui->buttonShowTimeAsISO, &QPushButton::toggled, this, &MainWindow::on_buttonShowTimeAsISO_toggled);
+
   if (settings.value("MainWindow.hiddenFileFrame", false).toBool())
   {
     ui->buttonHideFileFrame->setText("+");
@@ -938,6 +946,17 @@ void MainWindow::resizeEvent(QResizeEvent*)
   }
 }
 
+void MainWindow::on_buttonShowTimeAsISO_toggled(bool checked)
+{
+  _show_time_as_iso = checked;
+  QSettings settings;
+  settings.setValue("MainWindow.showTimeAsISO", _show_time_as_iso);
+
+  forEachWidget([this](PlotWidget* plot) {
+    plot->on_changeShowTimeAsISO(_show_time_as_iso);
+  });
+}
+
 void MainWindow::onPlotAdded(PlotWidget* plot)
 {
   connect(plot, &PlotWidget::undoableChange, this, &MainWindow::onUndoableChange);
@@ -972,6 +991,8 @@ void MainWindow::onPlotAdded(PlotWidget* plot)
   plot->setTrackerPosition(_tracker_time);
   plot->on_changeTimeOffset(_time_offset.get());
   plot->on_changeDateTimeScale(ui->buttonUseDateTime->isChecked());
+  plot->on_changeUseUtc(_use_utc_time);
+  plot->on_changeShowTimeAsISO(_show_time_as_iso);
   plot->activateGrid(ui->buttonActivateGrid->isChecked());
   plot->enableTracker(!isStreamingActive());
   plot->setKeepRatioXY(ui->buttonRatio->isChecked());
@@ -1430,6 +1451,7 @@ bool MainWindow::loadDataFromFiles(QStringList filenames, bool auto_prefix)
 
   QStringList loaded_filenames;
   _loaded_datafiles_previous.clear();
+
 
   for (int i = 0; i < filenames.size(); i++)
   {
@@ -2712,7 +2734,15 @@ void MainWindow::updatedDisplayTime()
     }
     else
     {
-      QDateTime datetime = QDateTime::fromMSecsSinceEpoch(std::round(_tracker_time * 1000.0));
+      QDateTime datetime;
+      if (_use_utc_time)
+      {
+        datetime = QDateTime::fromMSecsSinceEpoch(std::round(_tracker_time * 1000.0), Qt::UTC);
+      }
+      else
+      {
+        datetime = QDateTime::fromMSecsSinceEpoch(std::round(_tracker_time * 1000.0));
+      }
       timeLine->setText(datetime.toString("[yyyy MMM dd] HH:mm::ss.zzz"));
     }
   }
@@ -2840,6 +2870,44 @@ void MainWindow::on_buttonUseDateTime_toggled(bool checked)
     ui->buttonRemoveTimeOffset->setChecked(false);
   }
   updatedDisplayTime();
+}
+
+void MainWindow::on_buttonUseUtc_toggled(bool checked)
+{
+  static bool first = true;
+  _use_utc_time = checked;
+  QSettings settings;
+  settings.setValue("MainWindow.useUtcTime", _use_utc_time);
+
+  updatedDisplayTime();
+  forEachWidget([this](PlotWidget* plot) {
+    plot->on_changeUseUtc(_use_utc_time);
+  });
+  if (first)
+  {
+    QMessageBox::information(this, tr("Note"),
+                             tr("When \"Use UTC\" is checked, the option "
+                                "\"Remove Time Offset\" "
+                                "is automatically disabled.\n"
+                                "This message will be shown only once."));
+    first = false;
+  }
+  ui->buttonRemoveTimeOffset->setChecked(false);
+  ui->buttonUseDateTime->setChecked(true);
+}
+
+void MainWindow::on_buttonDots_toggled(bool checked)
+{
+  forEachWidget([&](PlotWidget* plot) {
+    plot->changeDots(checked);
+  });
+}
+
+void MainWindow::on_buttonStep_toggled(bool checked)
+{
+  forEachWidget([&](PlotWidget* plot) {
+    plot->changeStep(checked);
+  });
 }
 
 void MainWindow::on_buttonTimeTracker_pressed()
@@ -3747,9 +3815,4 @@ void MainWindow::on_buttonReferencePoint_toggled(bool checked)
 void MainWindow::on_buttonShowpoint_toggled(bool checked)
 {
   this->forEachWidget([checked](PlotWidget* plot) { plot->onShowPlot(checked); });
-}
-
-void MainWindow::on_buttonDots_toggled(bool checked)
-{
-  forEachWidget([&](PlotWidget* plot) { plot->changeDots(checked); });
 }

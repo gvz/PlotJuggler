@@ -127,8 +127,7 @@ QDomElement saveChildNodesState(QDomDocument& doc, QWidget* widget)
           area_elem.appendChild(plotwidget_elem);
           area_elem.setAttribute("name", dock_widget->toolBar()->label()->text());
           area_elem.setAttribute("viz_type", static_cast<int>(dock_widget->vizType()));
-          if (dock_widget->vizType() == DockWidget::STATE_TIMELINE &&
-              dock_widget->stateTimeline())
+          if (dock_widget->vizType() == DockWidget::STATE_TIMELINE && dock_widget->stateTimeline())
           {
             area_elem.appendChild(dock_widget->stateTimeline()->xmlSaveState(doc));
           }
@@ -220,7 +219,9 @@ void PlotDocker::restoreSplitter(QDomElement elem, DockWidget* widget)
         {
           auto stelem = child_elem.firstChildElement("StateTimeline");
           if (!stelem.isNull())
+          {
             widgets[index]->stateTimeline()->xmlLoadState(stelem);
+          }
         }
       }
       index++;
@@ -289,7 +290,9 @@ void PlotDocker::zoomOut()
     if (dock->vizType() == DockWidget::STATE_TIMELINE)
     {
       if (dock->stateTimeline())
+      {
         dock->stateTimeline()->zoomOut();
+      }
     }
     else
     {
@@ -304,7 +307,9 @@ void PlotDocker::forEachStateTimeline(std::function<void(StateTimelineWidget*)> 
   {
     auto* dock = static_cast<DockWidget*>(dockArea(index)->currentDockWidget());
     if (dock->stateTimeline())
+    {
       op(dock->stateTimeline());
+    }
   }
 }
 
@@ -316,7 +321,9 @@ void PlotDocker::replot()
     if (dock->vizType() == DockWidget::STATE_TIMELINE)
     {
       if (dock->stateTimeline())
+      {
         dock->stateTimeline()->replot();
+      }
     }
     else
     {
@@ -390,8 +397,8 @@ DockWidget::DockWidget(PlotDataMapRef& datamap, QWidget* parent)
   _stacked_widget = new QStackedWidget(this);
   _plot_widget = new PlotWidget(datamap, _stacked_widget);
   _state_timeline = new StateTimelineWidget(datamap, _stacked_widget);
-  _stacked_widget->addWidget(_plot_widget);      // index 0 = LINE_CHART
-  _stacked_widget->addWidget(_state_timeline);   // index 1 = STATE_TIMELINE
+  _stacked_widget->addWidget(_plot_widget);     // index 0 = LINE_CHART
+  _stacked_widget->addWidget(_state_timeline);  // index 1 = STATE_TIMELINE
 
   setWidget(_stacked_widget);
   setFeature(ads::CDockWidget::DockWidgetFloatable, false);
@@ -451,8 +458,7 @@ DockWidget::DockWidget(PlotDataMapRef& datamap, QWidget* parent)
   connect(_state_timeline, &StateTimelineWidget::switchToLineChart, this,
           [this]() { setVizType(LINE_CHART); });
 
-  connect(_state_timeline, &StateTimelineWidget::undoableChange, this,
-          &DockWidget::undoableChange);
+  connect(_state_timeline, &StateTimelineWidget::undoableChange, this, &DockWidget::undoableChange);
 
   this->layout()->setMargin(10);
 }

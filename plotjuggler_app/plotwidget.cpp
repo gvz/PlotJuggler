@@ -59,7 +59,9 @@
 class TimeScaleDraw : public QwtScaleDraw
 {
 public:
-  TimeScaleDraw(bool use_utc) : _use_utc(use_utc) {}
+  TimeScaleDraw(bool use_utc) : _use_utc(use_utc)
+  {
+  }
   virtual QwtText label(double v) const
   {
     QDateTime dt;
@@ -72,13 +74,13 @@ public:
       dt = QDateTime::fromMSecsSinceEpoch((qint64)(v * 1000));
     }
 
-
     if (dt.date().year() == 1970 && dt.date().month() == 1 && dt.date().day() == 1)
     {
       return dt.toString("hh:mm:ss.z");
     }
     return dt.toString("hh:mm:ss.z\nyyyy MMM dd");
   }
+
 private:
   bool _use_utc;
 };

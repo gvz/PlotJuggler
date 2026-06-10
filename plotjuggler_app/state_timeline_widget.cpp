@@ -28,16 +28,16 @@
 
 // Tableau 10 color palette
 const std::array<QColor, 10> StateTimelineWidget::PALETTE = {
-    QColor(0x4e, 0x79, 0xa7),  // blue
-    QColor(0xf2, 0x8e, 0x2b),  // orange
-    QColor(0xe1, 0x57, 0x59),  // red
-    QColor(0x76, 0xb7, 0xb2),  // teal
-    QColor(0x59, 0xa1, 0x4f),  // green
-    QColor(0xed, 0xc9, 0x48),  // yellow
-    QColor(0xb0, 0x7a, 0xa1),  // purple
-    QColor(0xff, 0x9d, 0xa7),  // pink
-    QColor(0x9c, 0x75, 0x5f),  // brown
-    QColor(0xba, 0xb0, 0xac),  // gray
+  QColor(0x4e, 0x79, 0xa7),  // blue
+  QColor(0xf2, 0x8e, 0x2b),  // orange
+  QColor(0xe1, 0x57, 0x59),  // red
+  QColor(0x76, 0xb7, 0xb2),  // teal
+  QColor(0x59, 0xa1, 0x4f),  // green
+  QColor(0xed, 0xc9, 0x48),  // yellow
+  QColor(0xb0, 0x7a, 0xa1),  // purple
+  QColor(0xff, 0x9d, 0xa7),  // pink
+  QColor(0x9c, 0x75, 0x5f),  // brown
+  QColor(0xba, 0xb0, 0xac),  // gray
 };
 
 StateTimelineWidget::StateTimelineWidget(PlotDataMapRef& datamap, QWidget* parent)
@@ -59,14 +59,18 @@ void StateTimelineWidget::addSeries(const QString& name)
   for (const auto& s : _series)
   {
     if (s.name == sname)
+    {
       return;
+    }
   }
 
   bool is_string = (_datamap.strings.count(sname) > 0);
   bool is_numeric = (_datamap.numeric.count(sname) > 0);
 
   if (!is_string && !is_numeric)
+  {
     return;
+  }
 
   _series.push_back({ sname, is_string });
   fitToData();
@@ -163,7 +167,9 @@ double StateTimelineWidget::timeToPixel(double t) const
 {
   const QRect pa = plotArea();
   if (_view_xmax == _view_xmin)
+  {
     return pa.left();
+  }
   return pa.left() + (t - _view_xmin) / (_view_xmax - _view_xmin) * pa.width();
 }
 
@@ -171,7 +177,9 @@ double StateTimelineWidget::pixelToTime(double px) const
 {
   const QRect pa = plotArea();
   if (pa.width() == 0)
+  {
     return _view_xmin;
+  }
   return _view_xmin + (px - pa.left()) / pa.width() * (_view_xmax - _view_xmin);
 }
 
@@ -223,7 +231,9 @@ QColor StateTimelineWidget::colorForState(const std::string& state_val)
 {
   auto it = _color_map.find(state_val);
   if (it != _color_map.end())
+  {
     return it->second;
+  }
 
   QColor c = PALETTE[_next_color_idx % PALETTE.size()];
   _next_color_idx++;
@@ -270,8 +280,8 @@ void StateTimelineWidget::paintEvent(QPaintEvent*)
     f.setPointSizeF(std::max(7.0, f.pointSizeF() - 1));
     painter.setFont(f);
     QFontMetrics fm(f);
-    QString label = fm.elidedText(QString::fromStdString(_series[row].name),
-                                   Qt::ElideLeft, label_rect.width() - 4);
+    QString label = fm.elidedText(QString::fromStdString(_series[row].name), Qt::ElideLeft,
+                                  label_rect.width() - 4);
     painter.drawText(label_rect, Qt::AlignRight | Qt::AlignVCenter, label);
 
     // Row background
@@ -284,13 +294,17 @@ void StateTimelineWidget::paintEvent(QPaintEvent*)
     {
       auto it = _datamap.strings.find(_series[row].name);
       if (it != _datamap.strings.end())
+      {
         drawStringSeries(painter, it->second, row_rect);
+      }
     }
     else
     {
       auto it = _datamap.numeric.find(_series[row].name);
       if (it != _datamap.numeric.end())
+      {
         drawNumericSeries(painter, it->second, row_rect);
+      }
     }
 
     painter.setClipping(false);
@@ -312,10 +326,12 @@ void StateTimelineWidget::paintEvent(QPaintEvent*)
 }
 
 void StateTimelineWidget::drawStringSeries(QPainter& painter, const StringSeries& series,
-                                            const QRect& row_rect)
+                                           const QRect& row_rect)
 {
   if (series.size() == 0)
+  {
     return;
+  }
 
   size_t n = series.size();
   QFont f = painter.font();
@@ -331,20 +347,26 @@ void StateTimelineWidget::drawStringSeries(QPainter& painter, const StringSeries
     // Advance while the state stays the same — merge consecutive equal segments
     size_t j = i + 1;
     while (j < n && std::string(series.getString(series.at(j).y)) == state_val)
+    {
       ++j;
+    }
 
     double t_end = (j < n) ? series.at(j).x : _view_xmax;
     i = j;
 
     if (t_end < _view_xmin || t_start > _view_xmax)
+    {
       continue;
+    }
 
     int x0 = static_cast<int>(timeToPixel(t_start));
     int x1 = static_cast<int>(timeToPixel(t_end));
     x0 = std::max(x0, row_rect.left());
     x1 = std::min(x1, row_rect.right());
     if (x1 <= x0)
+    {
       continue;
+    }
 
     QRect seg(x0, row_rect.top(), x1 - x0, row_rect.height());
     QColor color = colorForState(state_val);
@@ -364,17 +386,23 @@ static std::string numericStateLabel(double val)
 {
   char buf[32];
   if (std::fabs(val - std::round(val)) < 1e-9)
+  {
     std::snprintf(buf, sizeof(buf), "%d", static_cast<int>(std::round(val)));
+  }
   else
+  {
     std::snprintf(buf, sizeof(buf), "%.4g", val);
+  }
   return buf;
 }
 
 void StateTimelineWidget::drawNumericSeries(QPainter& painter, const PlotData& series,
-                                             const QRect& row_rect)
+                                            const QRect& row_rect)
 {
   if (series.size() == 0)
+  {
     return;
+  }
 
   size_t n = series.size();
   QFont f = painter.font();
@@ -390,20 +418,26 @@ void StateTimelineWidget::drawNumericSeries(QPainter& painter, const PlotData& s
     // Advance while the value stays the same — merge consecutive equal segments
     size_t j = i + 1;
     while (j < n && numericStateLabel(series.at(j).y) == state_val)
+    {
       ++j;
+    }
 
     double t_end = (j < n) ? series.at(j).x : _view_xmax;
     i = j;
 
     if (t_end < _view_xmin || t_start > _view_xmax)
+    {
       continue;
+    }
 
     int x0 = static_cast<int>(timeToPixel(t_start));
     int x1 = static_cast<int>(timeToPixel(t_end));
     x0 = std::max(x0, row_rect.left());
     x1 = std::min(x1, row_rect.right());
     if (x1 <= x0)
+    {
       continue;
+    }
 
     QRect seg(x0, row_rect.top(), x1 - x0, row_rect.height());
     QColor color = colorForState(state_val);
@@ -428,7 +462,9 @@ void StateTimelineWidget::drawTimeAxis(QPainter& painter, const QRect& pa)
 
   double range = _view_xmax - _view_xmin;
   if (range <= 0)
+  {
     return;
+  }
 
   // Pick a "nice" tick interval
   double raw = range / 7.0;
@@ -436,13 +472,21 @@ void StateTimelineWidget::drawTimeAxis(QPainter& painter, const QRect& pa)
   double norm = raw / mag;
   double interval;
   if (norm < 1.5)
+  {
     interval = mag;
+  }
   else if (norm < 3.5)
+  {
     interval = 2 * mag;
+  }
   else if (norm < 7.5)
+  {
     interval = 5 * mag;
+  }
   else
+  {
     interval = 10 * mag;
+  }
 
   QFont f = painter.font();
   f.setPointSizeF(std::max(7.0, f.pointSizeF() - 1));
@@ -450,25 +494,32 @@ void StateTimelineWidget::drawTimeAxis(QPainter& painter, const QRect& pa)
 
   // Index-based iteration avoids floating-point accumulation from repeated +=
   long long first_idx = static_cast<long long>(std::ceil(_view_xmin / interval));
-  for (long long idx = first_idx; ; ++idx)
+  for (long long idx = first_idx;; ++idx)
   {
     double t = idx * interval;  // no cumulative error
     if (t > _view_xmax + 1e-9 * interval)
+    {
       break;
+    }
     int x = static_cast<int>(timeToPixel(t));
     if (x < pa.left() || x > pa.right())
+    {
       continue;
+    }
     painter.drawLine(x, axis_y, x, axis_y + 4);
     QString label;
     if (_use_date_time_scale)
     {
-      QDateTime dt = _use_utc_time
-                         ? QDateTime::fromMSecsSinceEpoch((qint64)(t * 1000), Qt::UTC)
-                         : QDateTime::fromMSecsSinceEpoch((qint64)(t * 1000));
+      QDateTime dt = _use_utc_time ? QDateTime::fromMSecsSinceEpoch((qint64)(t * 1000), Qt::UTC) :
+                                     QDateTime::fromMSecsSinceEpoch((qint64)(t * 1000));
       if (dt.date().year() == 1970 && dt.date().month() == 1 && dt.date().day() == 1)
+      {
         label = dt.toString("hh:mm:ss.z");
+      }
       else
+      {
         label = dt.toString("hh:mm:ss.z\nyyyy MMM dd");
+      }
     }
     else
     {
@@ -518,7 +569,9 @@ void StateTimelineWidget::dropEvent(QDropEvent* event)
 {
   const QMimeData* mime = event->mimeData();
   if (!mime->hasFormat("curveslist/add_curve"))
+  {
     return;
+  }
 
   QByteArray encoded = mime->data("curveslist/add_curve");
   QDataStream stream(&encoded, QIODevice::ReadOnly);
@@ -540,9 +593,8 @@ void StateTimelineWidget::wheelEvent(QWheelEvent* event)
   double factor = (event->angleDelta().y() > 0) ? 0.8 : 1.25;
   double center = pixelToTime(event->pos().x());
   double range = (_view_xmax - _view_xmin) * factor;
-  double ratio = (_view_xmax - _view_xmin > 0)
-                     ? (center - _view_xmin) / (_view_xmax - _view_xmin)
-                     : 0.5;
+  double ratio =
+      (_view_xmax - _view_xmin > 0) ? (center - _view_xmin) / (_view_xmax - _view_xmin) : 0.5;
   _view_xmin = center - ratio * range;
   _view_xmax = center + (1.0 - ratio) * range;
   update();
@@ -564,12 +616,16 @@ void StateTimelineWidget::mousePressEvent(QMouseEvent* event)
 void StateTimelineWidget::mouseMoveEvent(QMouseEvent* event)
 {
   if (!_panning)
+  {
     return;
+  }
   const QRect pa = plotArea();
   if (pa.width() == 0)
+  {
     return;
-  double dt = (event->pos().x() - _pan_start.x()) *
-              (_pan_xmax_start - _pan_xmin_start) / pa.width();
+  }
+  double dt =
+      (event->pos().x() - _pan_start.x()) * (_pan_xmax_start - _pan_xmin_start) / pa.width();
   _view_xmin = _pan_xmin_start - dt;
   _view_xmax = _pan_xmax_start - dt;
   update();
@@ -616,7 +672,9 @@ void StateTimelineWidget::contextMenuEvent(QContextMenuEvent* event)
 
   QAction* selected = menu.exec(event->globalPos());
   if (!selected)
+  {
     return;
+  }
 
   if (selected == switch_action)
   {

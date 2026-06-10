@@ -7,4 +7,3 @@ Depends:  libqt5svg5, libqt5websockets5, libqt5serialport5, libqt5opengl5, libqt
 Maintainer: Davide Faconti <davide.faconti@gmail.com>
 Homepage: https://github.com/PlotJuggler/PlotJuggler
 Description: PlotJuggler is a tool to visualize time series that is fast, powerful and intuitive.
-

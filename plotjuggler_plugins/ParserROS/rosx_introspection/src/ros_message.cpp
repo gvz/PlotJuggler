@@ -176,7 +176,7 @@ MessageSchema::Ptr BuildMessageSchema(const std::string& topic_name, const std::
         recursiveTreeCreator(new_msg, new_string_node);
       }
     }  // end of for fields
-  };   // end of recursiveTreeCreator
+  };  // end of recursiveTreeCreator
 
   // build root and start recursion
   schema->root_field = std::make_unique<ROSField>(schema->root_msg->type(), topic_name);

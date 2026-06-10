@@ -413,7 +413,8 @@ MainWindow::MainWindow(const QCommandLineParser& commandline_parser, QWidget* pa
 
   _show_time_as_iso = settings.value("MainWindow.showTimeAsISO", false).toBool();
   ui->buttonShowTimeAsISO->setChecked(_show_time_as_iso);
-  connect(ui->buttonShowTimeAsISO, &QPushButton::toggled, this, &MainWindow::on_buttonShowTimeAsISO_toggled);
+  connect(ui->buttonShowTimeAsISO, &QPushButton::toggled, this,
+          &MainWindow::on_buttonShowTimeAsISO_toggled);
 
   if (settings.value("MainWindow.hiddenFileFrame", false).toBool())
   {
@@ -619,6 +620,8 @@ void MainWindow::onTrackerTimeUpdated(double absolute_time, bool do_replot)
       plot->replot();
     }
   });
+
+  forEachStateTimeline([&](StateTimelineWidget* st) { st->setTrackerPosition(_tracker_time); });
 }
 
 void MainWindow::initializeActions()
@@ -952,9 +955,7 @@ void MainWindow::on_buttonShowTimeAsISO_toggled(bool checked)
   QSettings settings;
   settings.setValue("MainWindow.showTimeAsISO", _show_time_as_iso);
 
-  forEachWidget([this](PlotWidget* plot) {
-    plot->on_changeShowTimeAsISO(_show_time_as_iso);
-  });
+  forEachWidget([this](PlotWidget* plot) { plot->on_changeShowTimeAsISO(_show_time_as_iso); });
 }
 
 void MainWindow::onPlotAdded(PlotWidget* plot)
@@ -987,6 +988,9 @@ void MainWindow::onPlotAdded(PlotWidget* plot)
   });
 
   connect(plot, &PlotWidget::rectChanged, this, &MainWindow::onPlotZoomChanged);
+
+  connect(plot, &PlotWidgetBase::widgetResized, this, &MainWindow::syncXAxisAlignment);
+  connect(plot, &PlotWidget::curveListChanged, this, &MainWindow::syncXAxisAlignment);
 
   plot->setTrackerPosition(_tracker_time);
   plot->on_changeTimeOffset(_time_offset.get());
@@ -1040,6 +1044,10 @@ void MainWindow::onPlotZoomChanged(PlotWidget* modified_plot, QRectF new_range)
       }
     };
     this->forEachWidget(visitor);
+
+    // Also sync all state timeline panels
+    forEachStateTimeline(
+        [&](StateTimelineWidget* st) { st->setXRange(new_range.left(), new_range.right()); });
   }
 
   onUndoableChange();
@@ -1049,10 +1057,91 @@ void MainWindow::onPlotTabAdded(PlotDocker* docker)
 {
   connect(docker, &PlotDocker::plotWidgetAdded, this, &MainWindow::onPlotAdded);
 
-  connect(this, &MainWindow::stylesheetChanged, docker, &PlotDocker::on_stylesheetChanged);
+  connect(docker, &PlotDocker::stateTimelineAdded, this, &MainWindow::onStateTimelineAdded);
 
-  // TODO  connect(matrix, &PlotMatrix::undoableChange, this,
-  // &MainWindow::onUndoableChange);
+  connect(this, &MainWindow::stylesheetChanged, docker, &PlotDocker::on_stylesheetChanged);
+}
+
+void MainWindow::onStateTimelineAdded(StateTimelineWidget* st)
+{
+  // Keep tracker in sync
+  st->setTrackerPosition(_tracker_time);
+
+  // Match datetime/UTC scale from the main toolbar
+  st->setUseDateTimeScale(ui->buttonUseDateTime->isChecked(), _use_utc_time);
+  connect(ui->buttonUseDateTime, &QPushButton::toggled, st,
+          [this, st](bool checked) { st->setUseDateTimeScale(checked, _use_utc_time); });
+
+  // Propagate this widget's pan/zoom to all line-chart panels (and other state timelines)
+  connect(st, &StateTimelineWidget::xRangeChanged, this,
+          [this, st](double xmin, double xmax) { onStateTimelineXRangeChanged(st, xmin, xmax); });
+
+  // Align x-axis start with adjacent PlotWidgets
+  syncXAxisAlignment();
+}
+
+void MainWindow::onStateTimelineXRangeChanged(StateTimelineWidget* source, double xmin, double xmax)
+{
+  if (!ui->buttonLink->isChecked())
+  {
+    return;
+  }
+
+  // Sync all line-chart panels
+  forEachWidget([&](PlotWidget* plot) {
+    if (!plot->isEmpty() && !plot->isXYPlot() && plot->isZoomLinkEnabled())
+    {
+      QRectF r = plot->currentBoundingRect();
+      r.setLeft(xmin);
+      r.setRight(xmax);
+      plot->setZoomRectangle(r, false);
+      plot->on_zoomOutVertical_triggered(false);
+      plot->replot();
+    }
+  });
+
+  // Sync all other state timeline panels
+  forEachStateTimeline([&](StateTimelineWidget* st) {
+    if (st != source)
+    {
+      st->setXRange(xmin, xmax);
+    }
+  });
+}
+
+void MainWindow::forEachStateTimeline(std::function<void(StateTimelineWidget*)> op)
+{
+  auto func = [&](QTabWidget* tabs) {
+    for (int t = 0; t < tabs->count(); t++)
+    {
+      PlotDocker* docker = dynamic_cast<PlotDocker*>(tabs->widget(t));
+      if (docker)
+      {
+        docker->forEachStateTimeline(op);
+      }
+    }
+  };
+  for (const auto& it : TabbedPlotWidget::instances())
+  {
+    func(it.second->tabWidget());
+  }
+}
+
+void MainWindow::syncXAxisAlignment()
+{
+  // Use the canvas left offset from any available PlotWidget as the reference
+  int left_offset = -1;
+  forEachWidget([&](PlotWidget* plot) {
+    if (left_offset < 0)
+    {
+      left_offset = plot->canvasLeftOffset();
+    }
+  });
+  if (left_offset > 0)
+  {
+    forEachStateTimeline(
+        [left_offset](StateTimelineWidget* st) { st->setLeftMargin(left_offset); });
+  }
 }
 
 QDomDocument MainWindow::xmlSaveState() const
@@ -2880,9 +2969,9 @@ void MainWindow::on_buttonUseUtc_toggled(bool checked)
   settings.setValue("MainWindow.useUtcTime", _use_utc_time);
 
   updatedDisplayTime();
-  forEachWidget([this](PlotWidget* plot) {
-    plot->on_changeUseUtc(_use_utc_time);
-  });
+  forEachWidget([this](PlotWidget* plot) { plot->on_changeUseUtc(_use_utc_time); });
+  forEachStateTimeline(
+      [this](StateTimelineWidget* st) { st->setUseDateTimeScale(true, _use_utc_time); });
   if (first)
   {
     QMessageBox::information(this, tr("Note"),
@@ -2898,16 +2987,12 @@ void MainWindow::on_buttonUseUtc_toggled(bool checked)
 
 void MainWindow::on_buttonDots_toggled(bool checked)
 {
-  forEachWidget([&](PlotWidget* plot) {
-    plot->changeDots(checked);
-  });
+  forEachWidget([&](PlotWidget* plot) { plot->changeDots(checked); });
 }
 
 void MainWindow::on_buttonStep_toggled(bool checked)
 {
-  forEachWidget([&](PlotWidget* plot) {
-    plot->changeStep(checked);
-  });
+  forEachWidget([&](PlotWidget* plot) { plot->changeStep(checked); });
 }
 
 void MainWindow::on_buttonTimeTracker_pressed()

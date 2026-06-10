@@ -88,9 +88,13 @@ public slots:
 
   void onPlotAdded(PlotWidget* plot);
 
+  void onStateTimelineAdded(StateTimelineWidget* st);
+
   void onPlotTabAdded(PlotDocker* docker);
 
   void onPlotZoomChanged(PlotWidget* modified_plot, QRectF new_range);
+
+  void onStateTimelineXRangeChanged(StateTimelineWidget* source, double xmin, double xmax);
 
   void on_tabbedAreaDestroyed(QObject* object);
 
@@ -214,6 +218,8 @@ private:
 
   void forEachWidget(std::function<void(PlotWidget*, PlotDocker*, int)> op);
   void forEachWidget(std::function<void(PlotWidget*)> op);
+  void forEachStateTimeline(std::function<void(StateTimelineWidget*)> op);
+  void syncXAxisAlignment();
 
   void rearrangeGridLayout();
 
@@ -325,8 +331,6 @@ private slots:
   void on_buttonShowpoint_toggled(bool checked);
   void on_buttonUseUtc_toggled(bool checked);
   void on_buttonShowTimeAsISO_toggled(bool checked);
-
-  void on_buttonDots_toggled(bool checked);
 
 private:
   bool _use_utc_time;
